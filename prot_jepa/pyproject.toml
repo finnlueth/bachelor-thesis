@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "bachelor-thesis"
+version = "0.1.0"
+description = "thesis"
+authors = ["Finn Lueth <38927318+finnlueth@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+torch = "^2.4.0"
+
+[tool.poetry.group.dev.dependencies]
+nvitop = "^1.3.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

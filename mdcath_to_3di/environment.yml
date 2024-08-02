@@ -1,0 +1,35 @@
+name: mdcath_to_3di
+channels:
+  - nvidia
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12.4
+  - pip
+  # - https://anaconda.org/conda-forge/torchmd-net/2.3.0/download/osx-64/torchmd-net-2.3.0-cpu_py39he7acbb7_0.conda
+  # - torchmd-net
+  - pip:
+    - torch==2.4.0
+    - transformers==4.43.3
+    - peft
+  - pip:
+    - pandas
+    - numpy
+    - matplotlib
+    - seaborn
+    - plotly
+    - scipy
+    - scikit-learn
+  - pip:
+    - ipykernel
+    - ipywidgets
+    - tqdm
+    - fastparquet
+  - pip:
+    - biopandas
+    - biopython
+    # - prody
+    - py3Dmol
+
+

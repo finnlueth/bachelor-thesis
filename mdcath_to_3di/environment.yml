@@ -7,8 +7,12 @@ channels:
 dependencies:
   - python=3.12.4
   - pip
+  ## MD ##
   # - https://anaconda.org/conda-forge/torchmd-net/2.3.0/download/osx-64/torchmd-net-2.3.0-cpu_py39he7acbb7_0.conda
   - torchmd-net
+  - nglview
+  - ambermd
+  - pytraj
   - pip:
     - torch==2.4.0
     - transformers==4.43.3
@@ -31,5 +35,6 @@ dependencies:
     - biopython
     # - prody
     - py3Dmol
+
 
 

@@ -1,0 +1,3 @@
+[submodule "prot_jepa/jepa"]
+	path = prot_jepa/jepa
+	url = git@github.com:facebookresearch/jepa.git

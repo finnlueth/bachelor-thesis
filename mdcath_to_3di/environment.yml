@@ -7,34 +7,38 @@ channels:
 dependencies:
   - python=3.12.4
   - pip
-  ## MD ##
-  # - https://anaconda.org/conda-forge/torchmd-net/2.3.0/download/osx-64/torchmd-net-2.3.0-cpu_py39he7acbb7_0.conda
   - torchmd-net
-  - nglview
-  - ambermd
-  - pytraj
+  - ambertools
+  - compilers
+  - conda-forge:
+    - pytraj
+    - deepchem
+    - nglview=3.0.8
+    - mdanalysis
+    - mdanalysistests
+    -
   - pip:
     - torch==2.4.0
+    - lightning
     - transformers==4.43.3
     - peft
-  - pip:
     - pandas
-    - numpy
+    - numpy==1.26.4
     - matplotlib
     - seaborn
     - plotly
     - scipy
     - scikit-learn
-  - pip:
     - ipykernel
     - ipywidgets
     - tqdm
     - fastparquet
-  - pip:
     - biopandas
     - biopython
     # - prody
     - py3Dmol
+    - pytraj
+    - nvitop
 
 
 

@@ -1,0 +1,10 @@
+packages = [{include = "src"}]
+
+[tool.distutils.egg_info]
+egg_base = ".venv"
+
+
+
+
+[tool.setuptools]
+package-dir = {"" = "src"}

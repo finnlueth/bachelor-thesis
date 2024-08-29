@@ -39,6 +39,5 @@ dependencies:
     - py3Dmol
     - pytraj
     - nvitop
-
-
-
+  - pip:
+    - -e .

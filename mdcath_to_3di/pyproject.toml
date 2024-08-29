@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+packages = [{include = "src"}]
+
+[tool.distutils.egg_info]
+egg_base = "target"
+
+[project]
+name = "src"
+version = "0.0.1"
+description = "None"
+authors = [
+    { name = "Finn Lueth", email = "finn.lueth@tum.de" },
+]
+dependencies = [
+]

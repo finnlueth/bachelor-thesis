@@ -5,23 +5,22 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.12.4
+  - python=3.12.0
   - pip
-  - torchmd-net
-  - ambertools
-  - compilers
-  - conda-forge:
-    - pytraj
-    - deepchem
-    - nglview=3.0.8
-    - mdanalysis
-    - mdanalysistests
-    -
+  # - conda-forge:
+  # - torchmd-net
+  # - ambertools
+  # - pytraj
+  # - deepchem
+  - nglview=3.0.8
+  - mdanalysis
+  - mdanalysistests
   - pip:
     - torch==2.4.0
     - lightning
     - transformers==4.43.3
     - peft
+    - datasets
     - pandas
     - numpy==1.26.4
     - matplotlib
@@ -37,7 +36,8 @@ dependencies:
     - biopython
     # - prody
     - py3Dmol
-    - pytraj
+    # - pytraj
     - nvitop
+    - ruff
   - pip:
     - -e .

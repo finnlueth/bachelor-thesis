@@ -1,0 +1,43 @@
+name: mdcath_to_3di
+channels:
+  - nvidia
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12.0
+  - pip
+  # - conda-forge:
+  # - torchmd-net
+  # - ambertools
+  # - pytraj
+  # - deepchem
+  - nglview=3.0.8
+  - mdanalysis
+  - mdanalysistests
+  - pip:
+    - torch==2.4.0
+    - lightning
+    - transformers==4.43.3
+    - peft
+    - datasets
+    - pandas
+    - numpy==1.26.4
+    - matplotlib
+    - seaborn
+    - plotly
+    - scipy
+    - scikit-learn
+    - ipykernel
+    - ipywidgets
+    - tqdm
+    - fastparquet
+    - biopandas
+    - biopython
+    # - prody
+    - py3Dmol
+    # - pytraj
+    # - nvitop
+    - ruff
+  - pip:
+    - -e .

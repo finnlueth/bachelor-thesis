@@ -159,3 +159,42 @@ traj_1 = pt.Trajectory(xyz=xyz, top=traj.top)
 #         break
 # state_dict = iterable_dataset.state_dict()
 # print(state_dict)
+
+
+trajectory_url = "hf://datasets/compsciencelab/mdCATH@7c651dc2159deb785668976d150b74d1c559a7e3/data/mdcath_dataset_1avyB00.h5"
+
+with xopen(trajectory_url, "rb") as file:
+    print(type(file))
+    bytes_ = BytesIO(file.read())
+extract_mdcath_information(bytes_)
+
+
+
+
+# os.makedirs(f"{FILE_PATHS['PDBs']}{res['name']}", exist_ok=True)
+# with open(f"{FILE_PATHS['PDBs']}{res['name']}/{res['name']}_{x}.pdb", "w") as pdb_file:
+#     pdb_file.write(result[x])
+
+
+
+
+# from multiprocessing import Pool
+
+# with Pool(processes=multiprocessing.cpu_count() - 1 or 1) as pool:
+#     result = pool.starmap(replace_coordinates_in_pdb, [(res["pdb"], coords) for coords in res['coords']["320"]["0"]])
+# result[123]
+
+
+
+
+# from src.data import foldseek, mdcath_processing
+# import h5py
+
+# file_path = "../tmp/data/traj/mdcath_dataset_1avyB00.h5"
+# process_config = {
+#     "traj_temp": "320",
+#     "traj_sim": "0",
+# }
+
+# data = mdcath_processing.extract_dataset_information(file_path, traj_temp=process_config["traj_temp"], traj_sim=process_config["traj_sim"])
+# mdcath_processing.mdcath_process(data)

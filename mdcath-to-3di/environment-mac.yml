@@ -31,6 +31,7 @@ dependencies:
     - ipykernel
     - ipywidgets
     - tqdm
+    - numba
     - fastparquet
     - biopandas
     - biopython

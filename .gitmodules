@@ -1,3 +1,3 @@
-[submodule "prot_jepa/jepa"]
-	path = prot_jepa/jepa
+[submodule "prot-jepa/jepa"]
+	path = prot-jepa/jepa
 	url = git@github.com:facebookresearch/jepa.git

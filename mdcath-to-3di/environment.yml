@@ -40,5 +40,8 @@ dependencies:
     # - pytraj
     - nvitop
     - ruff
+    - logomaker
+    - sentencepiece
+    - protobuf
   - pip:
     - -e .

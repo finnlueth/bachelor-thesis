@@ -1,3 +1,9 @@
 [submodule "prot-jepa/jepa"]
 	path = prot-jepa/jepa
 	url = git@github.com:facebookresearch/jepa.git
+[submodule "mdcath-to-3di/src/modules/bio2token"]
+	path = mdcath-to-3di/src/modules/bio2token
+	url = git@github.com:flagshippioneering/bio2token.git
+[submodule "mdcath-to-3di/src/modules/foldseek"]
+	path = mdcath-to-3di/src/modules/foldseek
+	url = git@github.com:steineggerlab/foldseek.git

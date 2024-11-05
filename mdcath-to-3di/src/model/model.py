@@ -27,7 +27,10 @@ from transformers import (
 )
 from transformers.modeling_outputs import TokenClassifierOutput
 
-from src.model.utils.modules import T5PSSMHead1 as T5PSSMHead
+from src.model.modules import T5PSSMHead4 as T5PSSMHead
+
+from IPython.display import display
+import pandas as pd
 
 
 class T5EncoderModelForPssmGeneration(T5EncoderModel):
@@ -52,8 +55,14 @@ class T5EncoderModelForPssmGeneration(T5EncoderModel):
         output_hidden_states=None,
         return_dict=None,
     ):
-        # labels = pssm
-        print("input_ids", input_ids.shape, input_ids)
+        
+        print("input_ids", input_ids.shape)
+        print(*input_ids.tolist(), sep="\n")
+        print("attention_mask", attention_mask.shape)
+        print(*attention_mask.tolist(), sep="\n")
+        print("labels", labels.shape)
+        for x in labels.tolist():
+            display(pd.DataFrame(x))
 
         encoder_outputs = super().forward(
             input_ids=input_ids,
@@ -64,16 +73,14 @@ class T5EncoderModelForPssmGeneration(T5EncoderModel):
             return_dict=return_dict,
         )
 
-        hidden_states = encoder_outputs["last_hidden_state"]
+        hidden_states = encoder_outputs["last_hidden_state"][:, :-1]
         print("hidden_states", hidden_states.shape)
 
         logits = self.pssm_head(hidden_states)
+        
         print("logits", logits.shape)
-
-        print("labels", labels.shape)
-
-        for x in labels:
-            print(len(x))
+        for x in logits.tolist():
+            display(pd.DataFrame(x))
 
         loss = None
         if labels is not None:
@@ -86,12 +93,13 @@ class T5EncoderModelForPssmGeneration(T5EncoderModel):
             output = (logits, encoder_outputs[2:-1])
             return ((loss,) + output) if loss is not None else output
 
-        return TokenClassifierOutput(
-            loss=loss,
-            logits=logits,
-            hidden_states=encoder_outputs.hidden_states,
-            attentions=encoder_outputs.attentions,
-        )
+        return None
+        # return TokenClassifierOutput(
+        #     loss=loss,
+        #     logits=logits,
+        #     hidden_states=encoder_outputs.hidden_states,
+        #     attentions=encoder_outputs.attentions,
+        # )
 
 
 def compute_metrics():

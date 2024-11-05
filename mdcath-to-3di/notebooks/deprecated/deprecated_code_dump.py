@@ -198,3 +198,54 @@ extract_mdcath_information(bytes_)
 
 # data = mdcath_processing.extract_dataset_information(file_path, traj_temp=process_config["traj_temp"], traj_sim=process_config["traj_sim"])
 # mdcath_processing.mdcath_process(data)
+
+
+
+
+
+dummy_sequences = [
+    "MKRESXKXAEQARRNRLAVALXELASLIPAEWKQQNVSAAPSKATTVEAACRYIRXLQQNGST",
+    "MKRESXKXAEQARRNRLAVALXELASLIPAEWKQ",
+    "MKRESXKXAEQARRNRLAVALXELAASDFASDFSLIPAEWKQ",
+    "MKRESXKXAEQARRNRLAVALXELASLIPAEWKASDFASDFASDFQ",
+    ]
+dummy_labels = [
+    "MKRESXKXAEQARRNRLAVALXELASLIPAEWKQQNVSAAPSKATTVEAACRYIRXLQQNGST",
+    "MKRESXKXAEQARRNRLAVALXELASLIPAEWKQ",
+    "MKRESXKXAEQARRNRLAVALXELAASDFASDFSLIPAEWKQ",
+    "MKRESXKXAEQARRNRLAVALXELASLIPAEWKASDFASDFASDFQ",
+    ]
+
+dummy_sequences = [" ".join([j for j in seq]) for seq in dummy_sequences]
+dummy_labels = [" ".join([j for j in seq]) for seq in dummy_labels]
+
+tokenized_sequence = t5_tokenizer(
+    text=dummy_sequences,
+    padding=False,
+    truncation=False,
+    max_length=512,
+    # truncation=True
+)
+tokenized_labels = t5_tokenizer(
+    text=dummy_labels,
+    padding=False,
+    truncation=False,
+    max_length=512,
+    # truncation=True
+)
+
+print(tokenized_sequence)
+
+i = 1
+pd.set_option('display.max_columns', None)
+display(pd.DataFrame([
+    tokenized_sequence['input_ids'][i],
+    tokenized_sequence['attention_mask'][i],
+]))
+
+data_collator = DataCollatorForT5Pssm(t5_tokenizer)
+
+dummy_ds = [{"input_ids": tokenized_sequence['input_ids'][i], "labels": tokenized_labels['input_ids'][i]} for i in range(len(dummy_sequences))]
+print(dummy_ds)
+collated_data = data_collator(dummy_ds)
+collated_data

@@ -27,6 +27,7 @@ from transformers import (
 )
 
 from src.model.model import T5EncoderModelForPssmGeneration, compute_metrics
+from src.model.utils import DataCollatorForT5Pssm
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu"))
 

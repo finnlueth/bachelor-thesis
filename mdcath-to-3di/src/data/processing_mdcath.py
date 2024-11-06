@@ -19,7 +19,7 @@ from Bio.SeqUtils import IUPACData
 from datasets.utils.file_utils import xopen
 from MDAnalysis.analysis.align import AlignTraj
 
-from src.data.foldseek import get_3di_sequences_from_memory
+from src.data.tokenize_foldseek import get_3di_sequences_from_memory
 
 warnings.simplefilter("ignore", BiopythonDeprecationWarning)
 
@@ -278,7 +278,7 @@ def generate_mdcath_coordiante_pdbs(extraced_trajectroy: dict) -> dict:
                 pdb=extraced_trajectroy["pdb"],
                 coordinates=extraced_trajectroy["coords"][temp][replica],
             )
-            items[f"{extraced_trajectroy["name"]}|{temp}|{replica}|{extraced_trajectroy["seq"]}"] = updated_pdbs
+            items[f"{extraced_trajectroy['name']}|{temp}|{replica}|{extraced_trajectroy['seq']}"] = updated_pdbs
     return items
 
 

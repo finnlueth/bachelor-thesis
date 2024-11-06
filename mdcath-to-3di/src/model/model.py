@@ -55,12 +55,13 @@ class T5EncoderModelForPssmGeneration(T5EncoderModel):
         output_hidden_states=None,
         return_dict=None,
     ):
-        
+
         print("input_ids", input_ids.shape)
         print(*input_ids.tolist(), sep="\n")
         print("attention_mask", attention_mask.shape)
         print(*attention_mask.tolist(), sep="\n")
         print("labels", labels.shape)
+
         for x in labels.tolist():
             display(pd.DataFrame(x))
 
@@ -77,7 +78,7 @@ class T5EncoderModelForPssmGeneration(T5EncoderModel):
         print("hidden_states", hidden_states.shape)
 
         logits = self.pssm_head(hidden_states)
-        
+
         print("logits", logits.shape)
         for x in logits.tolist():
             display(pd.DataFrame(x))

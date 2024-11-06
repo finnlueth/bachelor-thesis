@@ -12,8 +12,8 @@ import pyarrow as pa
 from datasets import ClassLabel, Dataset, Image, Value, load_dataset
 from datasets.utils.file_utils import xopen
 
-from src.data import foldseek
-from src.data.mdcath_processing import (
+from src.data import tokenize_foldseek
+from src.data.processing_mdcath import (
     download_open,
     download_process_pipeline,
     extract_mdcath_information,
@@ -29,20 +29,6 @@ from src.data.mdcath_processing import (
     translate_pdb_to_3di,
 )
 
-FILE_PATHS = {
-    "3Di": "../tmp/data/3Di",
-    "trajectories": "../tmp/data/mdCATH/data",
-    "mdCATH": "../tmp/data/mdCATH",
-    "PDB": "../tmp/data/PDB",
-    "pssm": "../tmp/data/pssm",
-    "cache": "../tmp/cache",
-}
-
-for x in FILE_PATHS.values():
-    os.makedirs(x, exist_ok=True)
 
 
-PROCESSING_CONFIG = {
-    "temperatures": ["320", "348"],
-    "replicas": ["0", "1"],
-}
+# todo read config

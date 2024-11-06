@@ -25,32 +25,25 @@ from transformers import (
     TrainingArguments,
     set_seed,
 )
+import yaml
 
 from src.model.model import T5EncoderModelForPssmGeneration, compute_metrics
 from src.model.utils import DataCollatorForT5Pssm
 
+with open('../configs/train.yml', 'r') as file:
+    CONFIG = yaml.safe_load(file)
+with open('../configs/project.yml', 'r') as file:
+    FILE_PATHS = yaml.safe_load(file)['paths']
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu"))
 
-MODEL_VERRSION = 0.1
-SEED = 69420
-BASE_MODEL = "Rostlab/prot_t5_xl_uniref50"
-# BASE_MODEL = "facebook/esm2_t6_8M_UR50D"
-VERBOSE = True
-FILE_PATHS = {
-    "pssm": "../tmp/data/pssm",
-    "models": "../tmp/models/",
-}
+MODEL_VERRSION = CONFIG['model_version']
+SEED = CONFIG['seed']
+BASE_MODEL = CONFIG['base_model']
 
 torch.manual_seed(SEED)
 random.seed(SEED)
 np.random.seed(SEED)
 set_seed(SEED)
 
-TRAINING_CONFIG = {
-    'learning_rate': 1e-4,
-    'batch_size': 2,
-    'num_epochs': 10,
-    'logging_steps': 1,
-    'eval_steps': 300,
-    'save_steps': 9999999,
-}
+TRAINING_CONFIG = CONFIG['training_config']

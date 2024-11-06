@@ -1,0 +1,15 @@
+paths:
+  # data
+  foldseek: "tmp/data/foldseek"
+  bio2token: "tmp/data/bio2token"
+  foldtoken: "tmp/data/foldtoken"
+  trajectories: "tmp/data/mdCATH/data"
+  mdcath: "tmp/data/mdCATH"
+  pdb: "tmp/data/PDB"
+  pssm: "tmp/data/pssm"
+  # cache
+  cache: "tmp/cache"
+  # models
+  models: "tmp/models/"
+  adapters: "tmp/models/adapters/"
+  predictions: "tmp/models/predictions"

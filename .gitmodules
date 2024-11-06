@@ -7,3 +7,6 @@
 [submodule "mdcath-to-3di/src/modules/foldseek"]
 	path = mdcath-to-3di/src/modules/foldseek
 	url = git@github.com:steineggerlab/foldseek.git
+[submodule "mdcath-to-3di/src/modules/foldtoken"]
+	path = mdcath-to-3di/src/modules/foldtoken
+	url = git@github.com:A4Bio/FoldToken_open.git

@@ -1,0 +1,8 @@
+processing_config:
+  temperatures: 
+    - "320"
+    - "348"
+  replicas: 
+    - "0"
+    - "1"
+# process_all: todo

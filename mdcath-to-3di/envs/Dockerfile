@@ -5,8 +5,12 @@ FROM nvcr.io/nvidia/ai-workbench/python-cuda120:1.0.3
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -y && apt install git-all curl -y
 
-if [ ! -d "/mnt/.venv" ]; then
-RUN if [ ! -d "/mnt/.venv" ] ; then echo Argument not provided ; else echo Argument is $arg ; fi
+RUN if [ ! -d "/mnt/.venv" ] ;\
+then echo .venv found ;\
+else echo .venv not found ; fi
+
+
+
 # ENV MAMBA_ROOT_PREFIX=/opt/micromamba
 # ENV PATH=$MAMBA_ROOT_PREFIX/bin:$PATH
 # RUN curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba \

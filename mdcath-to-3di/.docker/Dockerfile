@@ -1,11 +1,20 @@
-# FROM nvcr.io/nvidia/ai-workbench/python-cuda122:1.0.3
+# syntax=docker/dockerfile:1
 
-# ENV DEBIAN_FRONTEND=noninteractive
-# RUN apt-get update -y && apt install git-all curl -y
+FROM nvcr.io/nvidia/ai-workbench/python-cuda122:1.0.3
+# FROM python:3.12
 
-# WORKDIR /mnt/
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -y && apt install git-all curl -y
 
-# COPY ./envs/env_cuda.yml /mnt/env_cuda.yml
+RUN curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba
+RUN ./bin/micromamba shell init -s bash -r ~/micromamba
+
+# COPY ./envs/env_docker.yml /mnt/envs/env_docker.yml
+# RUN micromamba config set extract_threads 1 
+# RUN micromamba env create --file /mnt/envs/env_docker.yml --prefix /mnt/.venv -y
+# # RUN rm /mnt/envs/env_docker.yml
+# WORKDIR /mnt/code/
+
 
 # ENV MAMBA_ROOT_PREFIX=/opt/micromamba
 # ENV PATH=$MAMBA_ROOT_PREFIX/bin:$PATH

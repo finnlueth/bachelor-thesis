@@ -1,4 +1,4 @@
-name: mdcath_to_3di
+name: base
 channels:
   - nvidia
   - pytorch
@@ -43,5 +43,3 @@ dependencies:
     - logomaker
     - sentencepiece
     - protobuf
-  - pip:
-    - -e ..

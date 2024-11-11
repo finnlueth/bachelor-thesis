@@ -3,25 +3,27 @@
 FROM nvcr.io/nvidia/ai-workbench/python-cuda120:1.0.3
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update -y && apt install git-all -y
+RUN apt-get update -y && apt install git-all curl -y
 
-WORKDIR mnt/plmgen
+if [ ! -d "/mnt/.venv" ]; then
+RUN if [ ! -d "/mnt/.venv" ] ; then echo Argument not provided ; else echo Argument is $arg ; fi
+# ENV MAMBA_ROOT_PREFIX=/opt/micromamba
+# ENV PATH=$MAMBA_ROOT_PREFIX/bin:$PATH
+# RUN curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba \
+#     && mv bin/micromamba /usr/local/bin/ \
+#     && rm -rf bin \
+#     && micromamba shell init -s bash -p $MAMBA_ROOT_PREFIX
 
-RUN groupadd -g 30001 brennema && \
-     useradd --system --create-home --uid 30001 --gid 30001 -s /bin/bash brennema
+# WORKDIR /mnt/
 
-COPY --chown=brennema:brennema . .
-RUN git config --global --add safe.directory /mnt/plmgen
-RUN git remote set-url origin https://gitlab.lrz.de/0000000001496075/plmgen.git
+# # Copy the environment file
+# COPY envs/env_cuda.yml /mnt/envs/env_cuda.yml
 
-RUN --mount=type=cache,target=/root/.cache/pip \
-     pip cache info && \
-     pip install -e .
+# # Add entrypoint script
+# COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+# RUN chmod +x /usr/local/bin/entrypoint.sh
 
-USER brennema
-RUN git config --global --add safe.directory /mnt/plmgen
-
-
+# ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 
 

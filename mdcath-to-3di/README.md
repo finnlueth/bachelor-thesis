@@ -2,17 +2,18 @@
 
 ## Installation
 
-### Conda
+### Docker
 
 ```sh
-git submodule init
-# or 
-git submodule update --init
+# Build the Docker image
+docker build --tag finn . --no-cache -f ./envs/Dockerfile
 
-micromamba env create --file  ./env/environment.yml --prefix ./.venv -y
-micromamba activate --prefix ./.venv
-micromamba env remove --prefix ./.venv -y
-micromamba deactivate
-
-python envs/repo.py
+# Run the Docker container
+docker run -it \
+    --cpus 8 \
+    --memory 32G \
+    --gpus 1 \
+    --env-file ~/envs/env.list \
+    --rm \
+    finn
 ```

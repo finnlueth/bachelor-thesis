@@ -184,17 +184,38 @@ def rmsd_align(coordiantes: npt.NDArray, reference_pdb: str, frame: int = None) 
 
 
 def rmsd_align_all(extracted_traj: dict) -> dict:
-    for temp in extracted_traj['coords']:
-        for replica in extracted_traj['coords'][temp]:
-            extracted_traj['coords'][temp][replica] = rmsd_align(
-                coordiantes=extracted_traj['coords'][temp][replica],
-                reference_pdb=extracted_traj['pdb']
+    """
+    Aligns all coordinates in the extracted trajectory to a reference PDB structure using RMSD alignment.
+    Args:
+        extracted_traj (dict): A dictionary containing trajectory data with the following structure:
+            {
+                'coords': {
+                    temperature1: {
+                        replica1: coordinates_array,
+                        replica2: coordinates_array,
+                        ...
+                    },
+                    temperature2: {
+                        replica1: coordinates_array,
+                        replica2: coordinates_array,
+                        ...
+                    },
+                    ...
+                },
+                'pdb': reference_pdb_structure
+            }
+    Returns:
+        dict: The input dictionary with all coordinates aligned to the reference PDB structure.
+    """
+    for temp in extracted_traj["coords"]:
+        for replica in extracted_traj["coords"][temp]:
+            extracted_traj["coords"][temp][replica] = rmsd_align(
+                coordiantes=extracted_traj["coords"][temp][replica], reference_pdb=extracted_traj["pdb"]
             )
     return extracted_traj
 
 
-def save_PDBs(output_dir: str, PDBs: T.List[str]= None, template_PDB: str = None, name: str = None) -> str:
-
+def save_PDBs(output_dir: str, PDBs: T.List[str] = None, template_PDB: str = None, name: str = None) -> str:
     """
     Save a list of PDB strings to a directory.
     Args:
@@ -225,7 +246,6 @@ def save_PDBs(output_dir: str, PDBs: T.List[str]= None, template_PDB: str = None
 
 
 def save_pdbs_from_traj_dict(extraced_traj: dict, output_dir: str) -> str:
-
     """
     Save PDB files from the extracted trajectory dictionary.
     Args:
@@ -282,64 +302,6 @@ def generate_mdcath_coordiante_pdbs(extraced_trajectroy: dict) -> dict:
     return items
 
 
-def translate_pdb_to_3di(pbds: dict) -> dict:
-    """
-    Translates a dictionary of PDB files into 3Di sequences.
-
-    Args:
-        pbds (dict): A dictionary where keys are identifiers and values are lists of PDB file paths.
-
-    Returns:
-        dict: A dictionary where keys are the same identifiers and values are the corresponding 3DI sequences.
-    """
-    items = {}
-    for key, values in pbds.items():
-        items[key] = get_3di_sequences_from_memory(pdb_files=values)
-    return items
-
-
-def generate_fasta(extraced_traj: dict, processed_3Di: dict) -> str:
-    """
-    Generates a FASTA file from the extracted trajectory and the processed 3Di sequences.
-
-    Args:
-        extraced_traj (dict): A dictionary containing the extracted trajectory data.
-                              It should have the following structure:
-                              {
-                                  "name": trajectory_name,
-                                  "seq": amino_acid_sequence,
-                                }
-        processed_3Di (dict): A dictionary containing the processed 3Di sequences.
-                                It should have the following structure:
-                                {
-                                    "temp|replica": [sequence1, sequence2, ...],
-                                }
-    Returns:
-        str: A string containing the FASTA formatted data.
-    """
-    items = []
-    for name, sequences in processed_3Di.items():
-        items.append(f">{name}|{extraced_traj['seq']}")
-        items.extend(sequences)
-    return "\n".join(items)
-
-
-def save_fasta(path: str, fasta: str) -> str:
-    """
-    Save a FASTA formatted string to a file.
-    Args:
-        path (str): The directory path where the FASTA file will be saved.
-        extraced_traj (dict): A dictionary containing trajectory information,
-                              must include a 'name' key to name the file.
-        fasta (str): The FASTA formatted string to be written to the file.
-    Returns:
-        str: The full path to the saved FASTA file.
-    """
-    with open(path, "w", encoding="UTF-8") as file:
-        file.write(fasta)
-    return path
-
-
 def download_open(url: str = None, path: str = None, config: dict = None) -> dict:
     """
     Download and process MDCATH data from a given URL.
@@ -349,7 +311,7 @@ def download_open(url: str = None, path: str = None, config: dict = None) -> dic
     Returns:
         dict: A dictionary containing the processed data.
     """
-    
+
     if url:
         with xopen(url, "rb") as file:
             bytes_ = BytesIO(file.read())
@@ -371,7 +333,7 @@ def generate_pssms(processed_traj: dict) -> dict:
         dict: A dictionary containing the PSSMs for each 3Di sequence.
     """
     for key, sequences in processed_traj.items():
-        alphabet = 'ACDEFGHIKLMNPQRSTVWY'
+        alphabet = "ACDEFGHIKLMNPQRSTVWY"
         pfm = np.zeros((len(alphabet), len(sequences[0])))
 
         aa_to_index = {aa: idx for idx, aa in enumerate(alphabet)}
@@ -385,84 +347,3 @@ def generate_pssms(processed_traj: dict) -> dict:
         pssm = np.log2(pwm)
         processed_traj[key] = pssm
     return processed_traj
-
-
-def process_pipeline(md_cath_hdf5: bytes, config: dict = None, save_path_pdb: str = None, save_path_fasta: str = None) -> str:
-    extraced_traj = extract_mdcath_information(
-        file_path=md_cath_hdf5,
-        config=config
-    )
-    processed_traj = rmsd_align_all(extraced_traj)
-    processed_traj = generate_mdcath_coordiante_pdbs(extraced_trajectroy=processed_traj)
-
-    if save_path_pdb:
-        save_PDBs(
-            template_PDB=extraced_traj['pdb'],
-            output_dir=f"{save_path_pdb}/{extraced_traj['name']}",
-            name=f"{extraced_traj['name']}"
-        )
-
-        for cathid_temp_repl, pdb_frames in processed_traj.items():
-            save_PDBs(
-                PDBs=pdb_frames,
-                output_dir=f"{save_path_pdb}/{extraced_traj['name']}",
-                name=cathid_temp_repl
-            )
-
-    processed_traj = translate_pdb_to_3di(processed_traj)
-
-    if save_path_fasta:
-        processed_fasta = generate_fasta(
-            extraced_traj=extraced_traj,
-            processed_3Di=processed_traj
-        )
-        save_fasta(
-            fasta=processed_fasta,
-            path=f"{save_path_fasta}/{extraced_traj['name']}.fasta",
-        )
-        del processed_fasta
-        
-    processed_traj = generate_pssms(processed_traj)
-
-    return processed_traj
-
-
-def download_process_pipeline(url: str = None, path: str = None, config: dict = None, save_path_pdb: str = None, save_path_fasta: str = None):
-    bytes_ = download_open(
-        url=url,
-        path=path,
-        config=config)
-    return process_pipeline(
-        md_cath_hdf5=bytes_,
-        config=config,
-        save_path_pdb=save_path_pdb,
-        save_path_fasta=save_path_fasta
-    )
-
-
-def read_3Di_fasta(fasta: str) -> dict:
-    """
-    Read a FASTA file containing 3Di sequences.
-    Args:
-        fasta (str): The FASTA formatted string.
-    Returns:
-        dict: A dictionary containing the 3Di sequences.
-    """
-    items = {}
-    for line in fasta.split("\n"):
-        if line.startswith(">"):
-            name = line[1:]
-            items[name] = []
-        else:
-            items[name].append(line)
-    return items
-
-
-def fastas_to_hf_dataset(fasta: str, output_path: str) -> None:
-    """
-    Convert a FASTA file to an HDF5 dataset.
-    Args:
-        fasta (str): The FASTA formatted string.
-        output_path (str): The path to the output HDF5 file.
-    """
-    pass

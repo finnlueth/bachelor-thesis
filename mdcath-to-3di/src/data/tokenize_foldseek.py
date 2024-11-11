@@ -81,3 +81,73 @@ def get_3di_sequences_from_memory(pdb_files: T.List[str], foldseek_path="foldsee
         # return seq_records
         
         return seqs
+
+
+def translate_pdb_to_3di(pbds: dict) -> dict:
+    """
+    Translates a dictionary of PDB files into 3Di sequences.
+
+    Args:
+        pbds (dict): A dictionary where keys are identifiers and values are lists of PDB file paths.
+
+    Returns:
+        dict: A dictionary where keys are the same identifiers and values are the corresponding 3DI sequences.
+    """
+    items = {}
+    for key, values in pbds.items():
+        items[key] = get_3di_sequences_from_memory(pdb_files=values)
+    return items
+
+
+def generate_fasta(extraced_traj: dict, processed_3Di: dict) -> str:
+    """
+    Generates a FASTA file from the extracted trajectory and the processed 3Di sequences.
+
+    Args:
+        extraced_traj (dict): A dictionary containing the extracted trajectory data.
+                              It should have the following structure:
+                              {
+                                  "name": trajectory_name,
+                                  "seq": amino_acid_sequence,
+                                }
+        processed_3Di (dict): A dictionary containing the processed 3Di sequences.
+                                It should have the following structure:
+                                {
+                                    "temp|replica": [sequence1, sequence2, ...],
+                                }
+    Returns:
+        str: A string containing the FASTA formatted data.
+    """
+    items = []
+    for name, sequences in processed_3Di.items():
+        items.append(f">{name}|{extraced_traj['seq']}")
+        items.extend(sequences)
+    return "\n".join(items)
+
+
+def read_3Di_fasta(fasta: str) -> dict:
+    """
+    Read a FASTA file containing 3Di sequences.
+    Args:
+        fasta (str): The FASTA formatted string.
+    Returns:
+        dict: A dictionary containing the 3Di sequences.
+    """
+    items = {}
+    for line in fasta.split("\n"):
+        if line.startswith(">"):
+            name = line[1:]
+            items[name] = []
+        else:
+            items[name].append(line)
+    return items
+
+
+def fastas_to_hf_dataset(fasta: str, output_path: str) -> None:
+    """
+    Convert a FASTA file to an HDF5 dataset.
+    Args:
+        fasta (str): The FASTA formatted string.
+        output_path (str): The path to the output HDF5 file.
+    """
+    pass

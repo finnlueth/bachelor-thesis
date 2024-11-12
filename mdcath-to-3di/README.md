@@ -39,6 +39,10 @@ ls -1 ./tmp/data/mdCATH/data | wc -l
 du -h ./tmp/data/mdCATH/data
 
 df . -h
+
+ps -fA | grep python
+
+nohup python ./src/scripts/download.py
 ```
 
 ---

@@ -31,39 +31,15 @@ docker stop finn-container
 docker image rm finn-image
 ```
 
----
-
-
-### Docker Old
+### Other Commands
 
 ```sh
-docker run -it --cpus 8 --memory 32G --gpus 1 --env-file ./envs/env.list --rm finn
+ls -1 ./tmp/data/mdCATH/data | wc -l
 
-docker run -it --cpus 8 --memory 100G --gpus 1 --env-file ~/.docker/env.list --detach --rm
+du -h ./tmp/data/mdCATH/data
 
-
-
-
-docker build --tag finn-image . --file ./envs/Dockerfile
-
-docker container run -t -d -v $(PWD)/:/mnt/code/ --name finn-container finn-image
-
-docker container exec -it finn-container "/bin/bash"
-
-docker stop finn-container
-
-docker image rm finn-image
-
-docker build --tag finn-image . --file ./envs/Dockerfile --platform=linux/amd64
-docker container run -t -d --rm -v $(PWD)/:/mnt/code/ --name finn-container finn-image
-
-docker container run -t -d --rm \
--v $(PWD)/configs:/mnt/configs \
--v $(PWD)/entrypoints:/mnt/entrypoints \
--v $(PWD)/envs:/mnt/envs \
--v $(PWD)/notebooks:/mnt/notebooks \
--v $(PWD)/src:/mnt/src \
--v $(PWD)/tmp:/mnt/tmp \
---name finn-container finn-image
+df . -h
 ```
+
+---
 

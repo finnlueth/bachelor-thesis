@@ -59,9 +59,13 @@ docker container run -t -d --rm \
 ### Docker on Cluster
 
 ```sh
-docker image pull nvcr.io/nvidia/ai-workbench/python-cuda122:1.0.3
+docker image pull nvcr.io/nvidia/ai-workbench/python-cuda120:1.0.3
 
-docker container run -it -d -v $(pwd -P)/:/mnt/code/ --name finn-container nvcr.io/nvidia/ai-workbench/python-cuda122:1.0.3  --cpus 9 --memory 16G --gpus 1 --env-file ~/.docker/env.list
+docker container run -it -d -v $(pwd -P)/:/mnt/code/ --cpus 9 --memory 16G --gpus 1 --env-file .docker/env.list --name finn-container nvcr.io/nvidia/ai-workbench/python-cuda120:1.0.3
 
 docker container exec -it --workdir /mnt/code/ -it finn-container /bin/bash
+
+docker stop finn-container
+
+docker container rm finn-container
 ```

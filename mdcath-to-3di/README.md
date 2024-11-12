@@ -2,7 +2,7 @@
 
 ## Installation
 
-### Conda
+### Micromamba
 
 ```sh
 git submodule init
@@ -17,7 +17,24 @@ micromamba deactivate
 python envs/repo.py
 ```
 
-### Docker
+### Docker on Cluster
+
+```sh
+docker image pull nvcr.io/nvidia/ai-workbench/python-cuda120:1.0.3
+
+docker container run -it -d -v $(pwd -P)/:/mnt/code/ --cpus 8 --memory 32G --gpus 1 --env-file .docker/env.list --name finn-container nvcr.io/nvidia/ai-workbench/python-cuda120:1.0.3
+
+docker container exec -it --workdir /mnt/code/ -it finn-container "/bin/bash"
+
+docker stop finn-container
+
+docker image rm finn-image
+```
+
+---
+
+
+### Docker Old
 
 ```sh
 docker run -it --cpus 8 --memory 32G --gpus 1 --env-file ./envs/env.list --rm finn
@@ -31,17 +48,12 @@ docker build --tag finn-image . --file ./envs/Dockerfile
 
 docker container run -t -d -v $(PWD)/:/mnt/code/ --name finn-container finn-image
 
-docker container exec -it finn-container "/bin/bash && pip install -e /mnt/code/"
-
 docker container exec -it finn-container "/bin/bash"
 
 docker stop finn-container
 
 docker image rm finn-image
-```
 
-
-```sh
 docker build --tag finn-image . --file ./envs/Dockerfile --platform=linux/amd64
 docker container run -t -d --rm -v $(PWD)/:/mnt/code/ --name finn-container finn-image
 
@@ -55,17 +67,3 @@ docker container run -t -d --rm \
 --name finn-container finn-image
 ```
 
-
-### Docker on Cluster
-
-```sh
-docker image pull nvcr.io/nvidia/ai-workbench/python-cuda120:1.0.3
-
-docker container run -it -d -v $(pwd -P)/:/mnt/code/ --cpus 9 --memory 16G --gpus 1 --env-file .docker/env.list --name finn-container nvcr.io/nvidia/ai-workbench/python-cuda120:1.0.3
-
-docker container exec -it --workdir /mnt/code/ -it finn-container /bin/bash
-
-docker stop finn-container
-
-docker container rm finn-container
-```

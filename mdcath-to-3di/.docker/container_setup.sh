@@ -1,5 +1,4 @@
 #!/bin/bash
-
 cd ~
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y && apt install git-all curl -y
@@ -24,11 +23,16 @@ curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/mi
 ./bin/micromamba shell init -s bash -r ~/micromamba
 source ~/.bashrc
 
+groupadd -g 22367 lfi
+useradd --system --create-home --uid 22367 --gid 22367 -s /bin/bash lfi
+
 cd /mnt/code
 micromamba activate
 micromamba env create --file  .docker/env_docker.yml -y && micromamba clean --all --yes
 echo "micromamba activate dev" >> ~/.bashrc
 echo "cd /mnt/code" >> ~/.bashrc
-source ~/.bashrc
+echo "su lfi" >> ~/.bashrc
 
+source ~/.bashrc
 pip install -e .
+

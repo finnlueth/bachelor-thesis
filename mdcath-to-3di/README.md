@@ -26,7 +26,7 @@ docker container run -it -d -v $(pwd -P)/:/mnt/code/ --cpus 8 --memory 32G --gpu
 
 docker container exec -it --workdir /mnt/code/ -it finn-container "/bin/bash"
 
-docker stop finn-container
+docker container stop finn-container
 
 docker image rm finn-image
 ```
@@ -42,8 +42,5 @@ df . -h
 
 ps -fA | grep python
 
-nohup python ./src/scripts/download.py
+nohup python ./src/scripts/download.py &
 ```
-
----
-

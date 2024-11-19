@@ -47,4 +47,3 @@ ps -fA | grep python
 
 nohup python ./src/scripts/download.py &
 ```
-asdfas

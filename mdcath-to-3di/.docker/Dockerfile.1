@@ -1,0 +1,31 @@
+FROM nvcr.io/nvidia/ai-workbench/python-cuda120:1.0.3
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN groupadd -g 22367 lfi
+RUN useradd --system --create-home --uid 22367 --gid 22367 -s /bin/bash lfi
+
+RUN apt-get update -y && apt-get -y upgrade
+RUN apt-get install software-properties-common -y
+RUN add-apt-repository ppa:deadsnakes/ppa
+
+RUN apt install python3.12 -y
+RUN python3 -m pip install --upgrade pip
+RUN apt install git-all curl -y
+
+RUN curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba
+RUN ./bin/micromamba shell init -s bash -r ~/micromamba
+
+RUN chown -R lfi:lfi /root/.bashrc /bin/micromamba ~/micromamba
+RUN echo "export PATH=/bin:$PATH" >> /home/lfi/.bashrc
+RUN su lfi -c "micromamba shell init -s bash -r ~/micromamba"
+
+WORKDIR /home/lfi/
+USER lfi
+COPY env_docker.yml env_docker.yml
+RUN micromamba env create -vv --yes --name dev --file env_docker.yml && micromamba clean --index-cache --lock --packages --yes
+RUN echo "micromamba activate dev" >> ~/.bashrc
+
+WORKDIR /home/lfi/dev
+
+RUN echo 'if [ -d "/home/lfi/dev" ] && ! pip show -e . &>/dev/null; then cd /home/lfi/dev && pip install -e .; fi' >> ~/.bashrc

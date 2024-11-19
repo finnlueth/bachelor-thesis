@@ -1,12 +1,12 @@
-[submodule "prot-jepa/jepa"]
-	path = prot-jepa/jepa
-	url = git@github.com:facebookresearch/jepa.git
-[submodule "mdcath-to-3di/src/submodules/bio2token"]
-	path = mdcath-to-3di/src/submodules/bio2token
-	url = git@github.com:flagshippioneering/bio2token.git
-[submodule "mdcath-to-3di/src/submodules/foldseek"]
-	path = mdcath-to-3di/src/submodules/foldseek
-	url = git@github.com:steineggerlab/foldseek.git
-[submodule "mdcath-to-3di/src/submodules/foldtoken"]
-	path = mdcath-to-3di/src/submodules/foldtoken
-	url = git@github.com:A4Bio/FoldToken_open.git
+# [submodule "prot-jepa/jepa"]
+# 	path = prot-jepa/jepa
+# 	url = git@github.com:facebookresearch/jepa.git
+# [submodule "mdcath-to-3di/src/submodules/bio2token"]
+# 	path = mdcath-to-3di/src/submodules/bio2token
+# 	url = git@github.com:flagshippioneering/bio2token.git
+# [submodule "mdcath-to-3di/src/submodules/foldseek"]
+# 	path = mdcath-to-3di/src/submodules/foldseek
+# 	url = git@github.com:steineggerlab/foldseek.git
+# [submodule "mdcath-to-3di/src/submodules/foldtoken"]
+# 	path = mdcath-to-3di/src/submodules/foldtoken
+# 	url = git@github.com:A4Bio/FoldToken_open.git

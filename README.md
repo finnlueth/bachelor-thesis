@@ -43,3 +43,20 @@ git submodule add git@github.com:A4Bio/FoldToken_open.git mdcath-to-3di/src/subm
 * [MISATO GitHub](https://github.com/t7morgen/misato-dataset?tab=readme-ov-file)
 * [One-step nanoscale expansion microscopy reveals individual protein shapes](https://www.nature.com/articles/s41587-024-02431-9)
 * [Beautiful Figures Video](https://www.youtube.com/watch?v=i-HAjex6VtM)
+
+
+## Docker
+
+```sh
+# syntax=docker/dockerfile:1
+
+docker buildx build --platform=linux/amd64 -t finn-image .docker/
+docker container run -it -d --rm --env-file .docker/env.list -v $(pwd -P)/:/mnt/dev/ --platform linux/amd64 --name finn-container finn-image 
+docker container exec -it finn-container "/bin/bash" 
+
+docker container stop finn-container
+docker container rm finn-container
+docker image rm finn-image
+
+docker builder prune
+```

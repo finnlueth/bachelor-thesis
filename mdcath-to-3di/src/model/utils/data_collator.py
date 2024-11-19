@@ -6,6 +6,8 @@ from transformers.utils import PaddingStrategy
 
 from transformers.data.data_collator import pad_without_fast_tokenizer_warning
 
+from transformers.data.data_collator import DataCollatorForTokenClassification
+
 import pandas as pd
 from IPython.display import display
 
@@ -30,6 +32,7 @@ class DataCollatorForT5Pssm:
 
         labels = [feature[label_name] for feature in features] if label_name in features[0].keys() else None
         no_labels_features = [{k: v for k, v in feature.items() if k != label_name} for feature in features]
+        print("no_labels_features", no_labels_features)
 
         batch = pad_without_fast_tokenizer_warning(
             self.tokenizer,

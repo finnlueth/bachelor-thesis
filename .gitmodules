@@ -1,6 +1,3 @@
-# [submodule "mdcath-to-3di/src/submodules/foldtoken"]
-# 	path = mdcath-to-3di/src/submodules/foldtoken
-# 	url = git@github.com:A4Bio/FoldToken_open.git
 [submodule "prot-jepa/src/submodules/jepa"]
 	path = prot-jepa/src/submodules/jepa
 	url = git@github.com:facebookresearch/jepa.git

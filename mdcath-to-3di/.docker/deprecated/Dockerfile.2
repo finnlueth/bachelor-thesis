@@ -1,0 +1,12 @@
+FROM mambaorg/micromamba:git-9320035-cuda12.1.1-ubuntu20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+USER root
+
+RUN groupadd -g 22367 lfi
+RUN useradd --system --create-home --uid 22367 --gid 22367 -s /bin/bash lfi
+
+RUN chown -R lfi:lfi /home/lfi
+
+USER lfi

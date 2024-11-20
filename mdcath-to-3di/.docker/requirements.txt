@@ -1,0 +1,26 @@
+torch==2.4.0
+lightning
+transformers==4.43.3
+peft
+datasets
+pandas
+numpy==1.26.4
+matplotlib
+seaborn
+plotly
+scipy
+scikit-learn
+ipykernel
+ipywidgets
+tqdm
+numba
+fastparquet
+biopandas
+biopython
+# prody
+py3Dmol
+# pytraj
+nvitop
+ruff
+logomaker
+sentencepiece

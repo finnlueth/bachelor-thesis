@@ -5,9 +5,7 @@
 ### Micromamba
 
 ```sh
-git submodule init
-# or 
-git submodule update --init
+git submodule update --init --recursive
 
 micromamba env create --file  ./envs/env_base.yml --prefix ./.venv -y
 micromamba activate --prefix ./.venv

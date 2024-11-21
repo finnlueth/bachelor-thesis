@@ -10,6 +10,30 @@ import subprocess as sp
 from Bio import SeqIO, SeqRecord, Seq
 
 from src.utils import logging
+from src.data.tokenize.tokenize import BaseTokenizer, save_to_h5
+
+
+class FoldSeekTokenizer(BaseTokenizer):
+    def __init__(self):
+        super().__init__()
+
+    def load_model(self):
+        # Load the FoldSeek model here
+        pass
+
+    def tokenize(self, pdb_files: T.List[str]) -> T.List[str]:
+        # Implement the tokenization logic for FoldSeek
+        with tempfile.TemporaryDirectory() as tmpdir:
+            pdb_paths = []
+            for i, content in enumerate(pdb_files):
+                pdb_path = os.path.join(tmpdir, f"file_{i}.pdb")
+                with open(pdb_path, 'w') as file:
+                    file.write(content)
+                pdb_paths.append(pdb_path)
+
+            seq_records = get_3di_sequences_from_file(pdb_paths)
+            # Convert seq_records to a format suitable for HDF5
+            return [str(record.seq) for record in seq_records.values()]
 
 
 def get_3di_sequences_from_file(pdb_files: T.List[str], foldseek_path="foldseek"):

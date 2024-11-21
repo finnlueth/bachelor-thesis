@@ -19,7 +19,7 @@ from Bio.SeqUtils import IUPACData
 from datasets.utils.file_utils import xopen
 from MDAnalysis.analysis.align import AlignTraj
 
-from src.data.tokenize_foldseek import get_3di_sequences_from_memory
+from src.data.tokenize.foldseek import get_3di_sequences_from_memory
 
 warnings.simplefilter("ignore", BiopythonDeprecationWarning)
 

@@ -1,5 +1,5 @@
 from huggingface_hub import hf_hub_download
-sdfasdf
+
 
 def main():
     with open("./tmp/data/mdCATH/mdcath_domains.txt", "r") as file:

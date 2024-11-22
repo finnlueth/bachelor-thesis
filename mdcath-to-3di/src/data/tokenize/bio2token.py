@@ -6,7 +6,7 @@ import tempfile
 import typing as T
 import subprocess as sp
 from Bio import SeqIO, SeqRecord, Seq
-from src.data.tokenize.tokenize import BaseTokenizer, save_to_h5
+from src.data.tokenize.tokenize_base import BaseTokenizer, save_to_h5
 
 
 class Bio2TokenTokenizer(BaseTokenizer):

@@ -10,7 +10,7 @@ import subprocess as sp
 from Bio import SeqIO, SeqRecord, Seq
 
 from src.utils import logging
-from src.data.tokenize.tokenize import BaseTokenizer, save_to_h5
+from src.data.tokenize.tokenize_base import BaseTokenizer, save_to_h5
 
 
 class FoldSeekTokenizer(BaseTokenizer):

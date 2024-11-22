@@ -1,4 +1,4 @@
-from src.data.tokenize.tokenize import BaseTokenizer, save_to_h5
+from src.data.tokenize.tokenize_base import BaseTokenizer, save_to_h5
 import tempfile
 import os
 

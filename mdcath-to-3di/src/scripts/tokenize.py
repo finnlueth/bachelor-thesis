@@ -4,10 +4,17 @@ import logging
 import os
 import concurrent.futures
 from src.utils.logging import setup_logging
-from src.data.tokenize.foldseek import FoldSeekTokenizer
-from src.data.tokenize.foldtoken4 import FoldToken4Tokenizer
-from src.data.tokenize.bio2token import Bio2TokenTokenizer
-from src.data.utils import save_to_h5
+from src.data.tokenize import (
+    FoldSeekTokenizer,
+    FoldToken4Tokenizer,
+    Bio2TokenTokenizer
+)
+from src.data.load import (
+    MDCATHDataset,
+    MisatoDataset,
+    AtlasDataset
+)
+# from src.data.utils import save_to_h5
 
 # python src/scripts/tokenize.py --input_path ./ --output_path ./
 
@@ -16,16 +23,17 @@ def main():
     logger = logging.getLogger(__name__)
 
     parser = argparse.ArgumentParser(description="Tokenize input data")
-    parser.add_argument('--input_path', type=str, required=True, help='Path to the input file/directory')
-    parser.add_argument('--output_path', type=str, required=True, help='Path to the output file/directory')
+    parser.add_argument('--input_path', type=str, required=True, help='Path to the input file/directory. If directory, all files in the directory will be processed. If file, only the file will be processed.')
+    parser.add_argument('--output_path', type=str, required=True, help='Path to the output directory')
     parser.add_argument('--tokenizers', type=str, nargs='+', choices=['bio2token', 'foldseek', 'foldtoken4'], default=['bio2token', 'foldseek', 'foldtoken4'], help='List of tokenizers to use')
-    parser.add_argument('--process_dir', action='store_true', default=False, help='Process entire directory instead of single file')
+    parser.add_argument('--dataset', type=str, required=True, choices=['mdcath', 'misato', 'atlas'], help='Type of dataset structure to process')
 
     args = parser.parse_args()
 
     input_path = args.input_path
     output_path = args.output_path
     tokenizers = args.tokenizers
+    dataset = args.dataset
 
     logger.info("Input Path: %s", input_path)
     logger.info("Output Path: %s", output_path)
@@ -36,6 +44,16 @@ def main():
         'foldseek': FoldSeekTokenizer,
         'foldtoken4': FoldToken4Tokenizer
     }
+    tokenizer_classes = [tokenizer_classes[t] for t in tokenizers]
+    
+    dataset_class = {
+        'mdcath': MDCATHDataset,
+        'misato': MisatoDataset,
+        'atlas': AtlasDataset
+    }
+    dataset_class = dataset_class[dataset]
+    
+    
 
     def process_file(file_path):
         with open(file_path, 'r') as f:

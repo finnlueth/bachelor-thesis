@@ -7,10 +7,10 @@
 ```sh
 git submodule update --init --recursive
 
-micromamba env create --file  ./envs/env_base.yml --prefix ./.venv -y
+micromamba env create --file  ./envs/env.yml --prefix ./.venv -y
 micromamba activate --prefix ./.venv
-micromamba env remove --prefix ./.venv -y
 micromamba deactivate
+micromamba env remove --prefix ./.venv -y
 
 python envs/repo.py
 ```

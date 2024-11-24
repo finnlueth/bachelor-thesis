@@ -1,9 +1,11 @@
-import os
-from abc import ABC, abstractmethod
-from torch.utils.data import Dataset
 import json
-from dataclasses import dataclass, field
+import os
 import typing as T
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+
+import h5py
+from torch.utils.data import Dataset
 
 
 class TrajectoryDataset(Dataset, ABC):
@@ -46,7 +48,7 @@ class TrajectoryDataset(Dataset, ABC):
     def __getitem__(self, idx):
         """Retrieve a data sample for the given index."""
         if self.trajectory_locations[idx] in self.used_trajectory_locations:
-            raise ValueError(f"Trajectory {self.trajectory_locations[idx]} has already been accessed and used.")
+            raise ValueError(f"Trajectory {self.trajectory_locations[idx]} has already been accessed and processed.")
         if self.trajectory_locations[idx] in self.blocked_trajectory_locations:
             raise ValueError(f"Trajectory {self.trajectory_locations[idx]} has been blocked and cannot be accessed.")
         self.blocked_trajectory_locations.add(self.trajectory_locations[idx])
@@ -113,9 +115,38 @@ class TrajectoryDataset(Dataset, ABC):
 
 
 @dataclass
-class TrajectoryDataWrapper:
-    chain: str
-    element: str
-    pdb: str
+class TrajectoryWrapper:
+    name: str
+    sequence: str
+    structure: str
     trajectories: T.Dict[str, T.List[str]] = field(default_factory=dict)
-    trajectroy_pdbs: T.Dict[str, T.List[str]] = field(default_factory=dict)
+    trajectory_pdbs: T.Dict[str, T.List[str]] = field(default_factory=dict)
+    
+    def __getitem__(self, item):
+        return getattr(self, item)
+    
+    # def to_h5(self, file_path):
+    #     """
+    #     Converts the TrajectoryDataWrapper to an HDF5 file.
+    #     :param file_path: Path to the HDF5 file to be created.
+    #     """
+    #     with h5py.File(file_path, "w") as file:
+    #         for trajectory_type, trajectories in self.trajectories.items():
+    #             group = file.create_group(trajectory_type)
+    #             for trajectory_name, trajectory_data in trajectories.items():
+    #                 group.create_dataset(trajectory_name, data=trajectory_data)
+            
+    #         for pdb_type, pdbs in self.trajectroy_pdbs.items():
+    #             group = file.create_group(pdb_type)
+    #             for pdb_name, pdb_data in pdbs.items():
+    #                 group.create_dataset(pdb_name, data=pdb_data)
+                    
+    # def from_h5(self, file_path):
+    #     """
+    #     Converts an HDF5 file to a TrajectoryDataWrapper.
+    #     """
+    #     with h5py.File(file_path, "r") as file:
+    #         for trajectory_type, trajectories in self.trajectories.items():
+    #             group = file.get(trajectory_type)
+    #             for trajectory_name, trajectory_data in trajectories.items():
+    #                 group.get(trajectory_name)

@@ -11,7 +11,7 @@ class Bio2TokenTokenizer(BaseTokenizer):
         pass
 
     def tokenize(self, pdb_files: T.List[str]) -> T.List[str]:
-        pass
+        return ['a', 'b']
         # Implement the tokenization logic for Bio2Token
         # with tempfile.TemporaryDirectory() as tmpdir:
         #     pdb_paths = []
@@ -24,3 +24,7 @@ class Bio2TokenTokenizer(BaseTokenizer):
         #     # Implement specific logic for Bio2Token using pdb_paths
         #     # Convert results to a format suitable for HDF5
         #     return []  # Replace with actual data
+
+    def detokenize(self, tokens: T.List[str]) -> T.List[str]:
+        pass
+        # Implement the detokenization logic for Bio2Token

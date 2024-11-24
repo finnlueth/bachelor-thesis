@@ -14,6 +14,11 @@ class FoldToken4Tokenizer(BaseTokenizer):
 
     def tokenize(self, pdb_files: T.List[str]) -> T.List[str]:
         pass
+
+    def detokenize(self, tokens: T.List[str]) -> T.List[str]:
+        pass
+    
+    
         # Implement the tokenization logic for FoldToken4
         # with tempfile.TemporaryDirectory() as tmpdir:
         #     pdb_paths = []

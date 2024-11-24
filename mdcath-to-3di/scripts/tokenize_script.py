@@ -22,26 +22,28 @@ from src.data.tokenize import (
 from src.utils.logging import setup_logging
 
 
-def process_dataset_parallel(dataset: TrajectoryDataset, tokenizer_wrappers: dict, max_workers: int = os.cpu_count() - 1):
+def process_dataset_parallel(dataset_wrapper: TrajectoryDataset, tokenizer_wrappers: dict, max_workers: int = os.cpu_count() - 1):
     def _process_item(idx: int):
         try:
-            item = dataset[idx]
-            results = {}
+            item = dataset_wrapper[idx]
+            logging.info("Processing item %s", item["name"])
             for tokenizer_name, tokenizer_wrapper in tokenizer_wrappers.items():
-                results[tokenizer_name] = "123"  # tokenizer_wrapper.tokenize(item)
-            dataset.use_trajectory_location(idx)
-            return dataset[idx]
+                print(tokenizer_name, len(item["trajectories"]))
+                # results[tokenizer_name] = "123"  # tokenizer_wrapper.tokenize(item)
+            dataset_wrapper.use_trajectory_location(idx)
+            logging.info("Finished processing item %s", item["name"])
+            return item["name"]
         except ValueError as e:
             logging.error("Error processing item %s: %s", idx, e)
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        results = list(executor.map(_process_item, range(len(dataset))))
+        results = list(executor.map(_process_item, range(len(dataset_wrapper))))
 
-    return results
+    return [r for r in results if r is not None]
 
 
 def main():
-    setup_logging()
+    setup_logging("tmp/logs/", "tokenize_log")
 
     parser = argparse.ArgumentParser(description="Tokenize input trajectory files")
     parser.add_argument(
@@ -88,10 +90,10 @@ def main():
     tokenizer_wrappers = {t: tokenizer_wrappers[t]() for t in tokenizers}
 
     dataset_wrapper = {"mdcath": MDCATHDataset, "misato": MisatoDataset, "atlas": AtlasDataset}
-    dataset_wrapper = dataset_wrapper[dataset](data_dir=input_path)
+    dataset_wrapper = dataset_wrapper[dataset](data_dir=input_path, save_path=output_path)
 
-    results = process_dataset_parallel(dataset_wrapper, tokenizer_wrappers)
-    logging.info("Results: %s", results)
+    results = process_dataset_parallel(dataset_wrapper=dataset_wrapper, tokenizer_wrappers=tokenizer_wrappers)
+    logging.info("Processed items: %s", results)
 
 
 if __name__ == "__main__":

@@ -13,3 +13,4 @@ paths:
   models: "tmp/models/"
   adapters: "tmp/models/adapters/"
   predictions: "tmp/models/predictions"
+  logs: "tmp/logs"

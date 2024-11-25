@@ -1,3 +1,4 @@
-from foldseek import FoldSeekDataLoader
-from foldtoken4 import FoldToken4DataLoader
-from bio2token import Bio2TokenDataLoader
+from .mdcath import MDCATHDataset
+from .atlas import AtlasDataset
+from .misato import MisatoDataset
+from .trajectory_dataset import TrajectoryDataset

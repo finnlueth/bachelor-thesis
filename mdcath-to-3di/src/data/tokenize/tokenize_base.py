@@ -1,5 +1,6 @@
-import h5py
 from abc import ABC, abstractmethod
+import typing as T
+
 
 class BaseTokenizer(ABC):
     def __init__(self):
@@ -11,11 +12,11 @@ class BaseTokenizer(ABC):
         pass
 
     @abstractmethod
-    def tokenize(self, pdb_files: T.List[str], output_path: str):
+    def tokenize(self, pdb_files: T.List[str]) -> T.List[str]:
         """Tokenize the input data."""
         pass
 
-def save_to_h5(data, output_path, dataset_name="tokenized_data"):
-    """Save tokenized data to an HDF5 file."""
-    with h5py.File(output_path, 'w') as h5file:
-        h5file.create_dataset(dataset_name, data=data)
+    @abstractmethod
+    def detokenize(self, tokens: T.List[str]) -> T.List[str]:
+        """Detokenize the input data."""
+        pass

@@ -1,6 +1,8 @@
-from src.data.tokenize.tokenize_base import BaseTokenizer, save_to_h5
+from .tokenize_base import BaseTokenizer
 import tempfile
 import os
+import typing as T
+
 
 class FoldToken4Tokenizer(BaseTokenizer):
     def __init__(self):
@@ -11,15 +13,21 @@ class FoldToken4Tokenizer(BaseTokenizer):
         pass
 
     def tokenize(self, pdb_files: T.List[str]) -> T.List[str]:
-        # Implement the tokenization logic for FoldToken4
-        with tempfile.TemporaryDirectory() as tmpdir:
-            pdb_paths = []
-            for i, content in enumerate(pdb_files):
-                pdb_path = os.path.join(tmpdir, f"file_{i}.pdb")
-                with open(pdb_path, 'w') as file:
-                    file.write(content)
-                pdb_paths.append(pdb_path)
+        pass
 
-            # Implement specific logic for FoldToken4 using pdb_paths
-            # Convert results to a format suitable for HDF5
-            return []  # Replace with actual data
+    def detokenize(self, tokens: T.List[str]) -> T.List[str]:
+        pass
+    
+    
+        # Implement the tokenization logic for FoldToken4
+        # with tempfile.TemporaryDirectory() as tmpdir:
+        #     pdb_paths = []
+        #     for i, content in enumerate(pdb_files):
+        #         pdb_path = os.path.join(tmpdir, f"file_{i}.pdb")
+        #         with open(pdb_path, 'w') as file:
+        #             file.write(content)
+        #         pdb_paths.append(pdb_path)
+
+        #     # Implement specific logic for FoldToken4 using pdb_paths
+        #     # Convert results to a format suitable for HDF5
+        #     return []  # Replace with actual data

@@ -1,3 +1,4 @@
 from .foldseek import FoldSeekTokenizer
 from .foldtoken4 import FoldToken4Tokenizer
 from .bio2token import Bio2TokenTokenizer
+from .trajectory_tokenizer import TrajectoryTokenizer

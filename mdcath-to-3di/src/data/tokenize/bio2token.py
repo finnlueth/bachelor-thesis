@@ -1,8 +1,8 @@
 import typing as T
-from .tokenize_base import BaseTokenizer
+from .trajectory_tokenizer import TrajectoryTokenizer
 
 
-class Bio2TokenTokenizer(BaseTokenizer):
+class Bio2TokenTokenizer(TrajectoryTokenizer):
     def __init__(self):
         super().__init__()
 

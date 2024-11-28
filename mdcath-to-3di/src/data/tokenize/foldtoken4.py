@@ -1,10 +1,10 @@
-from .tokenize_base import BaseTokenizer
+from .trajectory_tokenizer import TrajectoryTokenizer
 import tempfile
 import os
 import typing as T
 
 
-class FoldToken4Tokenizer(BaseTokenizer):
+class FoldToken4Tokenizer(TrajectoryTokenizer):
     def __init__(self):
         super().__init__()
 

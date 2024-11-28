@@ -4,8 +4,16 @@ from Bio.SeqUtils import IUPACData
 from Bio.PDB import PDBParser
 import io
 from .trajectory_dataset import TrajectoryDataset, TrajectoryWrapper
+import numpy as np
+import typing as T
+import numpy.typing as npt
+import logging
+from src.utils.utils import CodeTimer
+from src.rust_modules import replace_pdb_coordinates
+from src.utils.bio import rmsd_align
 
-class MDCATHDataset(TrajectoryDataset):    
+
+class MDCATHDataset(TrajectoryDataset):
     def _load_trajectory_locations(self):
         if os.path.isdir(self.data_dir):
             return [os.path.join(self.data_dir, f) for f in os.listdir(self.data_dir) if f.endswith(".h5")]
@@ -15,18 +23,24 @@ class MDCATHDataset(TrajectoryDataset):
     def _get_item(self, idx):
         temperatures = ["320", "348", "379", "413", "450"]
         replicas = ["0", "1", "2", "3", "4"]
-        
+
         with h5py.File(self.trajectory_locations[idx], "r") as file:
             name = list(file.keys())[0]
             structure = file[name]["pdbProteinAtoms"][()].decode("utf-8")
-            sequence = "".join([IUPACData.protein_letters_3to1.get(x.get_resname().capitalize(), "X") for x in PDBParser(QUIET=True).get_structure("pdb_structure", io.StringIO(structure))[0].get_residues()])
-            
+            sequence = "".join(
+                [
+                    IUPACData.protein_letters_3to1.get(x.get_resname().capitalize(), "X")
+                    for x in PDBParser(QUIET=True).get_structure("pdb_structure", io.StringIO(structure))[0].get_residues()
+                ]
+            )
+
             trajectories, trajectory_pdbs = {}, {}
             for temp in temperatures:
                 for replica in replicas:
-                    trajectories[f"{temp}_{replica}"] = file[name][temp][replica]["coords"][()]
-                    trajectory_pdbs[f"{temp}_{replica}"] = (trajectories[f"{temp}_{replica}"])
-            
+                    logging.info(f"Processing temperature {temp} and replica {replica} for trajectory {name}.")
+                    trajectories[f"{temp}_{replica}"] = rmsd_align(file[name][temp][replica]["coords"][()], structure)
+                    trajectory_pdbs[f"{temp}_{replica}"] = replace_pdb_coordinates(structure, trajectories[f"{temp}_{replica}"])
+
             trajectory = TrajectoryWrapper(
                 name=name,
                 sequence=sequence,

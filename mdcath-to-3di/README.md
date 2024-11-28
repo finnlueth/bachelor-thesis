@@ -6,6 +6,7 @@
 
 ```sh
 git submodule update --init --recursive
+maturin develop
 
 micromamba env create --file  ./envs/env.yml --prefix ./.venv -y
 micromamba activate --prefix ./.venv

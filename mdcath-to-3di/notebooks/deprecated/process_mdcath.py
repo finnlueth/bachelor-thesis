@@ -21,6 +21,7 @@ from MDAnalysis.analysis.align import AlignTraj
 
 from src.data.tokenize.foldseek import get_3di_sequences_from_memory
 
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
 warnings.simplefilter("ignore", BiopythonDeprecationWarning)
 
 
@@ -86,31 +87,31 @@ def extract_mdcath_information(file_path: T.Union[str, BytesIO], config: T.Dict[
     }
 
 
-# def replace_coordinates_in_pdb(pdb: str, new_coordinates: npt.NDArray) -> str:
-#     """
-#     Replace coordinates in PDB content with new ones provided as a numpy array.
-#     Args:
-#         original_pdb (str): String containing the original PDB content.
-#         new_coordinates (np.array): New coordinates as a numpy array with shape (n_atoms, 3).
-#     Returns:
-#         tr: A string of the modified PDB content.
-#     """
-#     lines = pdb.split("\n")
-#     total_atoms = sum(1 for line in lines if line.startswith("ATOM"))
+def replace_coordinates_in_pdb(pdb: str, new_coordinates: npt.NDArray) -> str:
+    """
+    Replace coordinates in PDB content with new ones provided as a numpy array.
+    Args:
+        original_pdb (str): String containing the original PDB content.
+        new_coordinates (np.array): New coordinates as a numpy array with shape (n_atoms, 3).
+    Returns:
+        tr: A string of the modified PDB content.
+    """
+    lines = pdb.split("\n")
+    total_atoms = sum(1 for line in lines if line.startswith("ATOM"))
 
-#     if total_atoms != new_coordinates.shape[0]:
-#         raise ValueError(f"The number of new coordinates does not match the number of atoms\
-#                          in the PDB content {total_atoms}, {new_coordinates.shape[0]}.")
+    if total_atoms != new_coordinates.shape[0]:
+        raise ValueError(f"The number of new coordinates does not match the number of atoms\
+                         in the PDB content {total_atoms}, {new_coordinates.shape[0]}.")
 
-#     coordinate_index = 0
-#     for i, line in enumerate(lines):
-#         if line.startswith("ATOM"):
-#             x, y, z = new_coordinates[coordinate_index]
-#             new_line = f"{line[:30]}{x:>8.3f}{y:>8.3f}{z:>8.3f}{line[54:]}"
-#             lines[i] = new_line
-#             coordinate_index += 1
+    coordinate_index = 0
+    for i, line in enumerate(lines):
+        if line.startswith("ATOM"):
+            x, y, z = new_coordinates[coordinate_index]
+            new_line = f"{line[:30]}{x:>8.3f}{y:>8.3f}{z:>8.3f}{line[54:]}"
+            lines[i] = new_line
+            coordinate_index += 1
 
-#     return "\n".join(lines)
+    return "\n".join(lines)
 
 
 def replace_coordinates_in_pdbs(pdb: str, coordinates: npt.NDArray) -> T.List[str]:

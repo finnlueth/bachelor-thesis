@@ -1,7 +1,10 @@
 #! /usr/bin/env python3
 """
 python3 scripts/tokenize_script.py --input_path ./tmp/data/mdCATH/data/ --output_path ./tmp/output/tokenized/mdcath --tokenizers bio2token foldseek --dataset mdcath
+
 python scripts/tokenize_script.py --input_path ./tmp/data/mdCATH/data/ --output_path ./tmp/output/tokenized/mdcath --tokenizers foldseek --dataset mdcath
+
+python scripts/tokenize_script.py --input_path /home/finnlueth/mnt/smb/data/datasets/mdCATH/data --output_path ./tmp/output/tokenized/mdcath --tokenizers foldseek --dataset mdcath
 """
 
 import argparse
@@ -41,8 +44,15 @@ import MDAnalysis as mda
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.simplefilter("ignore", BiopythonDeprecationWarning)
-mda.lib.log.stop_logging()
 
+
+null_handler = logging.NullHandler()
+mda_logger = logging.getLogger("MDAnalysis")
+for handler in mda_logger.handlers[:]:
+    mda_logger.removeHandler(handler)
+mda_logger.addHandler(null_handler)
+mda_logger.setLevel(logging.CRITICAL)
+mda_logger.propagate = False
 
 
 

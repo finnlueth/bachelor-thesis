@@ -252,8 +252,8 @@ def main():
     results = process_dataset_parallel(
         dataset_class=dataset,
         tokenizer_classes=tokenizers,
-        # num_processes=psutil.cpu_count(logical=False) - 2,
-        num_processes=6,
+        num_processes=psutil.cpu_count(logical=False) - 1,
+        # num_processes=6,
     )
     logging.info("Processed items: %s", results)
 

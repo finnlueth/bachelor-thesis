@@ -6,7 +6,7 @@ import tempfile
 import subprocess as sp
 from Bio import SeqRecord, Seq
 
-from src.utils import logging
+import logging
 import typing as T
 from .trajectory_tokenizer import TrajectoryTokenizer
 
@@ -25,7 +25,6 @@ def get_3di_sequences_from_memory(pdb_files: T.List[str], foldseek_path="foldsee
         db_name = f"{tmpdir}/{pdb_dir_name}"
 
         FSEEK_BASE_CMD = f"{foldseek_path} createdb {pdb_file_string} {db_name}"
-        logging.info(FSEEK_BASE_CMD)
         proc = sp.Popen(shlex.split(FSEEK_BASE_CMD), stdout=sp.PIPE, stderr=sp.PIPE)
         out, err = proc.communicate()
 
@@ -44,122 +43,20 @@ def get_3di_sequences_from_memory(pdb_files: T.List[str], foldseek_path="foldsee
                 names = [line.strip().split()[1].split(".")[0] for line in name_file]
         else:
             raise FileNotFoundError(f"No lookup file found at {lookup_file_path}")
-
-        # seq_records = {
-        #     n: SeqRecord.SeqRecord(Seq.Seq(s), id=n, description="")
-        #     for (n, s) in zip(names, seqs)
-        # }
-        # return seq_records
-
         return seqs
 
 
 class FoldSeekTokenizer(TrajectoryTokenizer):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, tokenizer_name: str):
+        super().__init__(tokenizer_name)
         self.model = self.load_model()
 
     def load_model(self):
         return get_3di_sequences_from_memory
 
     def tokenize(self, pdb_files: T.List[str]) -> T.List[str]:
-        return ["a", "b"]
+        return self.model(pdb_files)
 
     def detokenize(self, tokens: T.List[str]) -> T.List[str]:
         raise NotImplementedError("FoldSeekTokenizer does not support detokenization.")
 
-
-# def get_3di_sequences_from_file(pdb_files: T.List[str], foldseek_path="foldseek"):
-#     pdb_file_string = " ".join([str(p) for p in pdb_files])
-#     pdb_dir_name = hash(pdb_file_string)
-
-#     with tempfile.TemporaryDirectory() as tmpdir:
-#         FSEEK_BASE_CMD = f"{foldseek_path} createdb {pdb_file_string} {tmpdir}/{pdb_dir_name}"
-#         # log(FSEEK_BASE_CMD)
-#         proc = sp.Popen(
-#             shlex.split(FSEEK_BASE_CMD), stdout=sp.PIPE, stderr=sp.PIPE
-#         )
-#         out, err = proc.communicate()
-
-#         with open(f"{tmpdir}/{pdb_dir_name}_ss", "r") as seq_file:
-#             seqs = [i.strip().strip("\x00") for i in seq_file]
-
-#         with open(f"{tmpdir}/{pdb_dir_name}.lookup", "r") as name_file:
-#             names = [i.strip().split()[1].split(".")[0] for i in name_file]
-
-#         seq_records = {
-#             n: SeqRecord.SeqRecord(Seq.Seq(s), id=n, description=n)
-#             for (n, s) in zip(names, seqs)
-#         }
-
-#         return seq_records
-
-
-# def translate_pdb_to_3di(pbds: dict) -> dict:
-#     """
-#     Translates a dictionary of PDB files into 3Di sequences.
-
-#     Args:
-#         pbds (dict): A dictionary where keys are identifiers and values are lists of PDB file paths.
-
-#     Returns:
-#         dict: A dictionary where keys are the same identifiers and values are the corresponding 3DI sequences.
-#     """
-#     items = {}
-#     for key, values in pbds.items():
-#         items[key] = get_3di_sequences_from_memory(pdb_files=values)
-#     return items
-
-
-# def generate_fasta(extraced_traj: dict, processed_3Di: dict) -> str:
-#     """
-#     Generates a FASTA file from the extracted trajectory and the processed 3Di sequences.
-
-#     Args:
-#         extraced_traj (dict): A dictionary containing the extracted trajectory data.
-#                               It should have the following structure:
-#                               {
-#                                   "name": trajectory_name,
-#                                   "seq": amino_acid_sequence,
-#                                 }
-#         processed_3Di (dict): A dictionary containing the processed 3Di sequences.
-#                                 It should have the following structure:
-#                                 {
-#                                     "temp|replica": [sequence1, sequence2, ...],
-#                                 }
-#     Returns:
-#         str: A string containing the FASTA formatted data.
-#     """
-#     items = []
-#     for name, sequences in processed_3Di.items():
-#         items.append(f">{name}|{extraced_traj['seq']}")
-#         items.extend(sequences)
-#     return "\n".join(items)
-
-
-# def read_3Di_fasta(fasta: str) -> dict:
-#     """
-#     Read a FASTA file containing 3Di sequences.
-#     Args:
-#         fasta (str): The FASTA formatted string.
-#     Returns:
-#         dict: A dictionary containing the 3Di sequences.
-#     """
-#     items = {}
-#     for line in fasta.split("\n"):
-#         if line.startswith(">"):
-#             name = line[1:]
-#             items[name] = []
-#         else:
-#             items[name].append(line)
-#     return items
-
-
-# def fastas_to_hf_dataset(fasta: str, output_path: str) -> None:
-#     """
-#     Convert a FASTA file to an HDF5 dataset.
-#     Args:
-#         fasta (str): The FASTA formatted string.
-#         output_path (str): The path to the output HDF5 file.
-#     """
-#     pass

@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 """
 python3 scripts/tokenize_script.py --input_path ./tmp/data/mdCATH/data/ --output_path ./tmp/output/tokenized/mdcath --tokenizers bio2token foldseek --dataset mdcath
+python scripts/tokenize_script.py --input_path ./tmp/data/mdCATH/data/ --output_path ./tmp/output/tokenized/mdcath --tokenizers foldseek --dataset mdcath
 """
 
 import argparse
@@ -8,6 +9,7 @@ import logging
 import os
 from multiprocessing import Pool, Lock, Manager
 import h5py
+
 import numpy as np
 
 from src.data.load import (
@@ -28,74 +30,158 @@ from src.utils.errors import TrajectoryAlreadyProcessedError
 import typing as T
 import warnings
 from Bio import BiopythonDeprecationWarning
+import psutil
+from src.data.load import TrajectoryDataset, TrajectoryWrapper
+from pathlib import Path
+import typing as T
+import json
+import time
+import random
 
-warnings.filterwarnings("ignore", category=DeprecationWarning) 
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.simplefilter("ignore", BiopythonDeprecationWarning)
 
 
-
-def write_to_h5_file(h5_file_path, tokenizer_name, trajectory_name, data, lock):
+def write_to_h5_file(
+    save_path: str,
+    tokenizer_name: str,
+    trajectory: TrajectoryWrapper,
+    tokenizer_results: T.Dict[str, T.List[str]],
+):
     """Write data to H5 file with proper locking"""
-    with lock:
-        with h5py.File(h5_file_path, 'a') as h5_file:
-            if tokenizer_name not in h5_file:
-                tokenizer_group = h5_file.create_group(tokenizer_name)
-            else:
-                tokenizer_group = h5_file[tokenizer_name]
-            
-            if trajectory_name not in tokenizer_group:
-                trajectory_group = tokenizer_group.create_group(trajectory_name)
-            else:
-                trajectory_group = tokenizer_group[trajectory_name]
-            
-            for i, item in enumerate(data):
-                if isinstance(item, np.ndarray):
-                    trajectory_group.create_dataset(f"array_{i}", data=item)
-                else:
-                    trajectory_group.create_dataset(f"string_{i}", data=np.bytes_(item))
+    while True:
+        try:
+            with lock_h5:
+                with h5py.File(save_path + "/tokenized_data.h5", "a") as h5_file:
+                    if tokenizer_name not in h5_file:
+                        tokenizer_group = h5_file.create_group(tokenizer_name)
+                    else:
+                        tokenizer_group = h5_file[tokenizer_name]
 
-def _process_trajectory(idx: int, dataset_class: TrajectoryDataset, tokenizer_classes: T.Dict[str, TrajectoryTokenizer], h5_file_path: str, lock_h5: Lock, lock_cache: Lock):
+                    if trajectory["name"] not in tokenizer_group:
+                        trajectory_group = tokenizer_group.create_group(trajectory["name"])
+                    else:
+                        trajectory_group = tokenizer_group[trajectory["name"]]
+
+                    trajectory_group.attrs["sequence"] = trajectory["sequence"]
+                    trajectory_group.attrs["name"] = trajectory["name"]
+                    trajectory_group.attrs["structure"] = trajectory["structure"]
+
+                    for temp_replica, tokens in tokenizer_results.items():
+                        tokens_array = np.array(tokens, dtype="S")
+                        if temp_replica in trajectory_group:
+                            del trajectory_group[temp_replica]
+                        trajectory_group.create_dataset(temp_replica, data=tokens_array)
+                break
+        except Exception as e:
+            logging.error("Waiting for h5 file to become available...", e)
+            time.sleep(random.uniform(0, 0.2))
+
+
+def use_trajectory_location_new(idx, dataset):
+    """
+    Mark a trajectory location as used.
+    """
+    while True:
+        try:
+            with lock_cache:
+                with open(dataset.save_path + f"/{dataset.cache_name}.json", "r") as f:
+                    used_trajectory_locations = json.load(f)
+                if dataset.trajectory_locations[idx] not in used_trajectory_locations:
+                    used_trajectory_locations.append(dataset.trajectory_locations[idx])
+                    with open(dataset.save_path + f"/{dataset.cache_name}.json", "w") as f:
+                        json.dump(used_trajectory_locations, f)
+                break
+        except Exception as e:
+            logging.error(f"Waiting for trajectory /{dataset.cache_name}.json to become available...", e)
+            time.sleep(random.uniform(0, 0.2))
+
+
+def _process_trajectory(
+    idx: int,
+    dataset_class: TrajectoryDataset,
+    tokenizers: T.List[TrajectoryTokenizer],
+):
+    trajectory = None
+    tokenized_trajectories = None
+    
     try:
-        print(f"Processing trajectory {idx} of {len(dataset_class)}")
+        logging.info(f"Processing trajectory {idx} of {len(dataset_class)}")
         trajectory = dataset_class[idx]
-        name = trajectory["name"]
-        logging.info("Tokenizing trajectory %s", trajectory["name"])
-        
-        print(trajectory["name"])
-        print(trajectory["trajectory_pdbs"].get("320_0")[5])
 
-        for tokenizer_name, tokenizer_wrapper in tokenizer_classes.items():
-            results = tokenizer_wrapper.tokenize(trajectory["structure"])
-            print(results)
-        #     results = tokenizer_wrapper.tokenize(trajectory["trajectories"])
-        # write_to_h5_file(h5_file_path, tokenizer_name, trajectory["name"], results, lock_h5)
-        dataset_class.use_trajectory_location(idx, lock_cache)
-        logging.info("Finished tokenizing trajectory %s", trajectory["name"])
-        del trajectory
+        # Calculate size of trajectory_pdbs in GB
+        total_bytes = sum(sum(len(pdb.encode()) for pdb in pdbs) for pdbs in trajectory["trajectory_pdbs"].values())
+        size_gb = total_bytes / (1024 * 1024 * 1024)
+        logging.error(f"Size of trajectory_pdbs for {trajectory['name']}: {size_gb:.2f} GB")
+
+        name = trajectory["name"]
+        trajectory["trajectory_pdbs"]["base"] = [trajectory["structure"]]
+        logging.info(
+            "Starting tokenizing trajectory %s with %s tokenizers",
+            trajectory["name"],
+            [tokenizer.tokenizer_name for tokenizer in tokenizers],
+        )
+
+        for tokenizer in tokenizers:
+            tokenized_trajectories = {}
+            for temp_replica, trajectory_pdb in trajectory["trajectory_pdbs"].items():
+                tokenized_trajectories[temp_replica] = tokenizer.tokenize(trajectory_pdb)
+                logging.error("Tokenized trajectory %s for %s", trajectory["name"], temp_replica)
+            write_to_h5_file(
+                save_path=dataset_class.save_path,
+                tokenizer_name=tokenizer.tokenizer_name,
+                trajectory=trajectory,
+                tokenizer_results=tokenized_trajectories,
+            )
+
+        use_trajectory_location_new(idx=idx, dataset=dataset_class)
+
+        logging.error("Finished tokenizing trajectory %s", trajectory["name"])
         return name
+
     except TrajectoryAlreadyProcessedError as e:
         logging.error(e)
         return None
+    except Exception as e:
+        logging.error(f"Error processing trajectory {idx}: {str(e)}")
+        return None
+    finally:
+        # Explicit cleanup
+        if trajectory is not None:
+            del trajectory
+        if tokenized_trajectories is not None:
+            del tokenized_trajectories
 
-def process_dataset_parallel(dataset_class: TrajectoryDataset, tokenizer_classes: dict, output_path: str, num_processes: int = os.cpu_count() - 1):
-    h5_file_path = os.path.join(output_path, "tokenized_data.h5")
-    
-    manager_h5 = Manager()
-    lock_h5 = manager_h5.Lock()
-    manager_cache = Manager()
-    lock_cache = manager_cache.Lock()
 
-    args = [(idx, dataset_class, tokenizer_classes, h5_file_path, lock_h5, lock_cache) for idx in range(len(dataset_class))]
+def init_parallel(l_cache, l_h5):
+    global lock_cache
+    global lock_h5
+    lock_cache = l_cache
+    lock_h5 = l_h5
 
-    with Pool(processes=num_processes) as pool:
-        with CodeTimer():
+
+def process_dataset_parallel(
+    dataset_class: TrajectoryDataset,
+    tokenizer_classes: dict,
+    num_processes: int = psutil.cpu_count(logical=False) - 1,
+):
+    args = [(idx, dataset_class, tokenizer_classes) for idx in range(len(dataset_class))]
+
+    lock_cache = Lock()
+    lock_h5 = Lock()
+
+    with Pool(processes=num_processes, initializer=init_parallel, initargs=(lock_cache, lock_h5)) as pool:
+        try:
             results = pool.starmap(_process_trajectory, args)
+        finally:
+            pool.close()
+            pool.join()
 
     return [r for r in results if r is not None]
 
 
 def main():
-    setup_logging(file_path="tmp/logs/", console=False)
+    setup_logging(file_path="tmp/logs/", console=True)
 
     parser = argparse.ArgumentParser(description="Tokenize input trajectory files")
     parser.add_argument(
@@ -138,12 +224,23 @@ def main():
     logging.info("Output Path: %s", output_path)
     logging.info("Tokenizers: %s", tokenizers)
 
-    tokenizer_classes = {t: {"foldseek": FoldSeekTokenizer, "bio2token": Bio2TokenTokenizer, "foldtoken4": FoldToken4Tokenizer}[t]() for t in tokenizers}
+    tokenizers = {
+        {"foldseek": FoldSeekTokenizer, "bio2token": Bio2TokenTokenizer, "foldtoken4": FoldToken4Tokenizer}[tokenizer](
+            tokenizer_name=tokenizer
+        )
+        for tokenizer in tokenizers
+    }
 
-    dataset_class = {"mdcath": MDCATHDataset, "misato": MisatoDataset, "atlas": AtlasDataset}[dataset](data_dir=input_path, save_path=output_path)
+    dataset = {"mdcath": MDCATHDataset, "misato": MisatoDataset, "atlas": AtlasDataset}[dataset](
+        dataset_name=dataset, data_dir=input_path, save_path=output_path
+    )
 
-
-    results = process_dataset_parallel(dataset_class=dataset_class, tokenizer_classes=tokenizer_classes, output_path=output_path, num_processes=1)
+    results = process_dataset_parallel(
+        dataset_class=dataset,
+        tokenizer_classes=tokenizers,
+        # num_processes=psutil.cpu_count(logical=False) - 2,
+        num_processes=6,
+    )
     logging.info("Processed items: %s", results)
 
 

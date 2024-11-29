@@ -3,7 +3,8 @@ import typing as T
 
 
 class TrajectoryTokenizer(ABC):
-    def __init__(self):
+    def __init__(self, tokenizer_name: str):
+        self.tokenizer_name = tokenizer_name
         self.model = self.load_model()
 
     @abstractmethod

@@ -37,9 +37,13 @@ import typing as T
 import json
 import time
 import random
+import MDAnalysis as mda
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.simplefilter("ignore", BiopythonDeprecationWarning)
+mda.lib.log.stop_logging()
+
+
 
 
 def write_to_h5_file(

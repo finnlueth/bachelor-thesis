@@ -38,11 +38,12 @@ class T5EncoderModelForPssmGeneration(T5EncoderModel):
         config: T5Config,
     ):
         super().__init__(config)
+        
+        self.pssm_head = T5PSSMHead(config)
 
         for name, init_func in modeling_utils.TORCH_INIT_FUNCTIONS.items():
             setattr(torch.nn.init, name, init_func)
 
-        self.pssm_head = T5PSSMHead(config)
 
     def forward(
         self,

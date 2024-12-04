@@ -5,7 +5,21 @@ use std::fmt::Write;
 #[pymodule]
 fn rust_modules(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(replace_pdb_coordinates, m)?)?;
+    m.add_function(wrap_pyfunction!(decode_bytestrings, m)?)?;
     Ok(())
+}
+
+#[pyfunction]
+fn decode_bytestrings(byte_strings: Vec<Vec<u8>>) -> PyResult<Vec<String>> {
+    byte_strings
+        .into_iter()
+        .map(|bytes| {
+            String::from_utf8(bytes)
+                .map_err(|e| PyErr::new::<pyo3::exceptions::PyUnicodeDecodeError, _>(
+                    format!("Failed to decode bytes to UTF-8: {}", e)
+                ))
+        })
+        .collect()
 }
 
 #[pyfunction]

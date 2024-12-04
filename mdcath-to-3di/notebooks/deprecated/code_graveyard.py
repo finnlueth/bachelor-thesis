@@ -1,17 +1,17 @@
 
-    # def use_trajectory_location(self, idx, lock):
-    #     """
-    #     Mark a trajectory location as used.
-    #     """
-    #     with lock:
-    #         with open(self.save_path + f"/{self.cache_name}.json", "r") as f:
-    #             used_trajectory_locations = json.load(f)
-    #         used_trajectory_locations.append(self.trajectory_locations[idx])
-    #         with open(self.save_path + f"/{self.cache_name}.json", "w") as f:
-    #             json.dump(used_trajectory_locations, f)
-        # self.used_trajectory_locations.add(self.trajectory_locations[idx])
-        # self.blocked_trajectory_locations.discard(self.trajectory_locations[idx])
-        # self._save_used_trajectory_locations()
+    def use_trajectory_location(self, idx, lock):
+        """
+        Mark a trajectory location as used.
+        """
+        with lock:
+            with open(self.save_path + f"/{self.cache_name}.json", "r") as f:
+                used_trajectory_locations = json.load(f)
+            used_trajectory_locations.append(self.trajectory_locations[idx])
+            with open(self.save_path + f"/{self.cache_name}.json", "w") as f:
+                json.dump(used_trajectory_locations, f)
+        self.used_trajectory_locations.add(self.trajectory_locations[idx])
+        self.blocked_trajectory_locations.discard(self.trajectory_locations[idx])
+        self._save_used_trajectory_locations()
 
     # def reset(self):
     #     """
@@ -180,3 +180,48 @@
 #         output_path (str): The path to the output HDF5 file.
 #     """
 #     pass
+
+
+
+from typing import List
+import time
+
+def decode_bytes_comprehension(byte_strings: List[bytes]) -> List[str]:
+    return [b.decode('utf-8') for b in byte_strings]
+
+def decode_bytes_map(byte_strings: List[bytes]) -> List[str]:
+    return list(map(lambda x: x.decode('utf-8'), byte_strings))
+
+def benchmark_decoding(byte_strings: List[bytes], iterations: int = 1):
+    start = time.perf_counter()
+    for _ in range(iterations):
+        decode_bytes_comprehension(byte_strings)
+    comp_time = (time.perf_counter() - start) / iterations
+    
+    start = time.perf_counter()
+    for _ in range(iterations):
+        decode_bytes_map(byte_strings)
+    map_time = (time.perf_counter() - start) / iterations
+    
+    return {'comprehension': comp_time, 'map': map_time}
+
+test_data = [b'hello'*40,] * 400 * 25 * 5000
+results = benchmark_decoding(test_data)
+print(f"List comprehension: {results['comprehension']:.6f} seconds")
+print(f"Map: {results['map']:.6f} seconds")
+
+
+
+# with h5py.File('../tmp/data/tokenized/mdcath/tokenized_data.h5', 'r') as file:
+#     strings = {
+#         f'{domain}_{trajectory}': rust_modules.decode_bytestrings(file['foldseek'][domain][trajectory])
+#         for domain in tqdm(list(file['foldseek']))
+#         for trajectory in file['foldseek'][domain]
+#     }
+
+# with open('../tmp/mdcath_foldseek_trajectories.pkl', 'wb') as f:
+#     pickle.dump(strings, f)
+
+# print(len(strings))
+
+# assert strings == strings_new

@@ -6,8 +6,28 @@ use std::fmt::Write;
 fn rust_modules(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(replace_pdb_coordinates, m)?)?;
     m.add_function(wrap_pyfunction!(decode_bytestrings, m)?)?;
+    m.add_function(wrap_pyfunction!(strings_to_fasta, m)?)?;
     Ok(())
 }
+
+#[pyfunction]
+fn strings_to_fasta(strings: Vec<String>, name: String) -> PyResult<String> {
+    let mut fasta = String::new();
+    for (i, sequence) in strings.iter().enumerate() {
+        writeln!(&mut fasta, ">{}|frame_{}", name, i).map_err(|e| {
+            PyErr::new::<pyo3::exceptions::PyValueError, _>(
+                format!("Failed to write header: {}", e)
+            )
+        })?;
+        writeln!(&mut fasta, "{}", sequence.trim()).map_err(|e| {
+            PyErr::new::<pyo3::exceptions::PyValueError, _>(
+                format!("Failed to write sequence: {}", e) 
+            )
+        })?;
+    }
+    Ok(fasta)
+}
+
 
 #[pyfunction]
 fn decode_bytestrings(byte_strings: Vec<Vec<u8>>) -> PyResult<Vec<String>> {
@@ -84,6 +104,5 @@ fn replace_pdb_coordinates(pdb_template: String, coordinates: PyReadonlyArray3<f
         
         pdbs.push(new_pdb);
     }
-    
     Ok(pdbs)
 }

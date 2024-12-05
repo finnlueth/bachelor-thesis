@@ -15,7 +15,7 @@ def get_3di_sequences_from_memory(pdb_files: T.List[str], foldseek_path="foldsee
     with tempfile.TemporaryDirectory() as tmpdir:
         pdb_paths = []
         for i, content in enumerate(pdb_files):
-            pdb_path = os.path.join(tmpdir, f"file_{i}.pdb")
+            pdb_path = os.path.join(tmpdir, f"file_{i:05d}.pdb")
             with open(pdb_path, "w") as file:
                 file.write(content)
             pdb_paths.append(pdb_path)

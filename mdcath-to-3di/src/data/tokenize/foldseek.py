@@ -43,7 +43,8 @@ def get_3di_sequences_from_memory(pdb_files: T.List[str], foldseek_path="foldsee
                 names = [line.strip().split()[1].split(".")[0] for line in name_file]
         else:
             raise FileNotFoundError(f"No lookup file found at {lookup_file_path}")
-        return names, seqs
+        # return names, seqs
+        return seqs
 
 
 class FoldSeekTokenizer(TrajectoryTokenizer):

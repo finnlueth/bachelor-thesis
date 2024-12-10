@@ -81,11 +81,6 @@ def create_single_sequence_logo(sequences):
     return fig
 
 
-def hamming_distance(seq1, seq2):
-    """Compute the normalized Hamming distance between two sequences."""
-    return sum(c1 != c2 for c1, c2 in zip(seq1, seq2)) / len(seq1)
-
-
 def plot_sequence_order_pca_matplotlib(sequences_dict, numbering=False, arrows=False, average_arrows=False):
     """
     Perform PCA on sequences from a dictionary, visualize them in 2D, and color by sequence order.
@@ -183,10 +178,14 @@ def plot_sequence_order_pca_plotly(sequences_dict, numbering=False, arrows=False
     Returns:
     plotly.graph_objects.Figure: Interactive Plotly figure
     """
+    import Levenshtein
     colorscale = "cool"
+    distance = Levenshtein.distance
+    
+    
     for name, sequences in sequences_dict.items():
         sequence_array = np.array(sequences).reshape(-1, 1)
-        pairwise_distances = pdist(sequence_array, metric=lambda u, v: hamming_distance(u[0], v[0]))
+        pairwise_distances = pdist(sequence_array, metric=lambda u, v: distance(u[0], v[0]))
         distance_matrix = squareform(pairwise_distances)
 
         pca = PCA(n_components=2)
@@ -207,7 +206,7 @@ def plot_sequence_order_pca_plotly(sequences_dict, numbering=False, arrows=False
                     colorscale=[[i/255, f"rgb{tuple(int(x * 255) for x in plt.cm.cool(i/255)[:3])}"] for i in range(256)],
                     showscale=True,
                     colorbar=dict(
-                        title="Sequence Order",
+                        title="Trajectory Frames",
                         tickmode="array",
                         ticktext=list(range(0, len(sequences) + 1, 100)),
                         tickvals=list(range(0, len(sequences) + 1, 100)),

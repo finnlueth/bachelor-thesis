@@ -49,3 +49,20 @@ docker image rm finn-image
 
 docker builder prune
 ```
+
+
+
+
+### Other
+
+docker container run -it --cpus 8 --memory 32G --gpus 1 -d --rm -v $(pwd -P)/:/home/lfi/mnt/dev/ --name finn-test nvcr.io/nvidia/ai-workbench/python-cuda120:1.0.3
+
+docker container exec -it finn-test "/bin/bash" 
+
+
+
+
+docker container run -it --cpus 8 --memory 32G --gpus 1 -d --env-file ~/.docker_config/env.list \
+-v $(pwd -P)/:/home/lfi/mnt/dev/ \
+-v /mnt/project/data/lfi/huggingface:/home/lfi/.cache/huggingface \
+--name finn-container-bachelor-test finn-image

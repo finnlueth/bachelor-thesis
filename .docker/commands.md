@@ -9,15 +9,15 @@ docker buildx build --platform=linux/amd64 -t finn-image .docker/ -f .docker/Doc
 #### Cluster
 
 ```sh
-docker container run -it --cpus 8 --memory 32G --gpus 1 -d --env-file ~/.docker_config/env.list \
+docker container run -it --cpus 8 --memory 32G --gpus all -d --env-file ~/.docker_config/env.list \
 -v $(pwd -P)/:/home/lfi/mnt/dev/ \
 -v /mnt/project/data/lfi/huggingface:/home/lfi/.cache/huggingface \
--v /mnt/bio/home/lfi/.cursor-server:/home/lfi/.cursor-server \
+-v /mnt/project/data/lfi/.cursor-server:/home/lfi/.cursor-server \
 --name finn-container-bachelor-thesis finn-image 
 
 docker container start finn-container-bachelor-thesis
-
 docker container stop finn-container-bachelor-thesis
+
 docker container exec -it finn-container-bachelor-thesis "/bin/bash" 
 
 docker container rm finn-container-bachelor-thesis
@@ -49,3 +49,20 @@ docker image rm finn-image
 
 docker builder prune
 ```
+
+
+
+
+### Other
+
+docker container run -it --cpus 8 --memory 32G --gpus 1 -d --rm -v $(pwd -P)/:/home/lfi/mnt/dev/ --name finn-test nvcr.io/nvidia/ai-workbench/python-cuda120:1.0.3
+
+docker container exec -it finn-test "/bin/bash" 
+
+
+
+
+docker container run -it --cpus 8 --memory 32G --gpus 1 -d --env-file ~/.docker_config/env.list \
+-v $(pwd -P)/:/home/lfi/mnt/dev/ \
+-v /mnt/project/data/lfi/huggingface:/home/lfi/.cache/huggingface \
+--name finn-container-bachelor-test finn-image

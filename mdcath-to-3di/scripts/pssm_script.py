@@ -1,7 +1,7 @@
 """
 python3 scripts/pssm_script.py --input_path /home/finnlueth/mnt/smb/data/datasets/mdCATH/data --output_path ./tmp/output/pssm/mdcath --dataset mdcath
 
- ['     A      C      D      E      F      G      H      I      K      L      M      N      P      Q      R      S      T      V      W      Y      ']
+ ['A C D E F G H I K L M N P Q R S T V W Y']
 """
 
 import argparse
@@ -72,11 +72,31 @@ def write_to_h5_file(
     pssms: T.Dict[str, np.ndarray],
 ):
     """Write data to H5 file with proper locking"""
-    pass
+    while True:
+        try:
+            with lock_h5:
+                with h5py.File(save_path + "/pssm_data.h5", "a") as h5_file:
+                    if trajectory["name"] not in h5_file:
+                        trajectory_group = h5_file.create_group(trajectory["name"])
+                    else:
+                        trajectory_group = h5_file[trajectory["name"]]
+
+                    trajectory_group.attrs["sequence"] = trajectory["sequence"]
+                    trajectory_group.attrs["name"] = trajectory["name"]
+                    trajectory_group.attrs["structure"] = trajectory["structure"]
+
+                    for temp_replica, pssm in pssms.items():
+                        if temp_replica in trajectory_group:
+                            del trajectory_group[temp_replica]
+                        trajectory_group.create_dataset(temp_replica, data=pssm)
+                break
+        except Exception as e:
+            logging.error("Waiting for h5 file to become available...", e)
+            time.sleep(random.uniform(0, 0.2))
 
 
 def get_pssm_from_trajectory(trajectory_pdbs: T.List[str]) -> np.ndarray:
-    print(len(trajectory_pdbs))
+    # print(len(trajectory_pdbs))
 
     with tempfile.TemporaryDirectory() as tmpdir:
         input_dir = os.path.join(tmpdir, "inputs")
@@ -95,7 +115,12 @@ def get_pssm_from_trajectory(trajectory_pdbs: T.List[str]) -> np.ndarray:
         foldseek = "foldseek"
         mmseqs = "mmseqs"
 
-        subprocess.run([foldseek, "createdb", input_dir, os.path.join(tmpdir, "inputdb")], check=True)
+        subprocess.run(
+            [foldseek, "createdb", input_dir, os.path.join(tmpdir, "inputdb")],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            # stderr=subprocess.STDOUT,
+        )
 
         with open(os.path.join(tmpdir, "inputdb.index")) as f:
             index_data = f.readlines()
@@ -120,6 +145,8 @@ def get_pssm_from_trajectory(trajectory_pdbs: T.List[str]) -> np.ndarray:
                 "5",
             ],
             check=True,
+            stdout=subprocess.DEVNULL,
+            # stderr=subprocess.STDOUT,
         )
 
         victors_params = [
@@ -156,14 +183,17 @@ def get_pssm_from_trajectory(trajectory_pdbs: T.List[str]) -> np.ndarray:
             ]
             + victors_params,
             check=True,
+            stdout=subprocess.DEVNULL,
+            # stderr=subprocess.STDOUT,
         )
 
-        profile_data = pd.read_csv(os.path.join(tmpdir, "profile.tsv"), sep=" ", header=None)
-        print(profile_data)
-        print(profile_data.to_numpy())
-        print(profile_data.to_numpy().shape)
-        print(profile_data.to_numpy()[1:])
-        return profile_data.to_numpy()[1:]
+        profile_data = pd.read_csv(os.path.join(tmpdir, "profile.tsv"), sep=" ", header=None, skiprows=2)
+        profile_data = profile_data.iloc[:, :-1]
+        # print(profile_data)
+        # print(profile_data.to_numpy())
+        # print(profile_data.to_numpy().shape)
+        # print(profile_data.to_numpy())
+        return profile_data.to_numpy()
 
 
 def _process_trajectory(
@@ -193,11 +223,11 @@ def _process_trajectory(
                 trajectory_pssm[temp_replica] = get_pssm_from_trajectory(trajectory_pdbs)
                 logging.error("Creating PSSM for trajectory %s for %s", trajectory["name"], temp_replica)
 
-        write_to_h5_file(
-            save_path=dataset_class.save_path,
-            trajectory=trajectory,
-            pssms=trajectory_pssm,
-        )
+                write_to_h5_file(
+                    save_path=dataset_class.save_path,
+                    trajectory=trajectory,
+                    pssms=trajectory_pssm,
+                )
 
         use_trajectory_location_new(idx=idx, dataset=dataset_class)
 
@@ -227,7 +257,7 @@ def process_dataset_parallel(
     dataset_class: TrajectoryDataset,
     num_processes: int = 1,
 ):
-    args = [(idx, dataset_class) for idx in range(len(dataset_class))][:2]
+    args = [(idx, dataset_class) for idx in range(len(dataset_class))]#[:2]
 
     lock_cache = Lock()
     lock_h5 = Lock()
@@ -282,8 +312,8 @@ def main():
 
     results = process_dataset_parallel(
         dataset_class=dataset,
-        num_processes=2,
-        # num_processes=psutil.cpu_count(logical=False) - 1,
+        # num_processes=2,
+        num_processes=psutil.cpu_count(logical=False) - 1,
         # num_processes=6,
     )
 

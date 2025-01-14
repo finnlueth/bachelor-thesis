@@ -84,7 +84,7 @@ def write_to_h5_file(
                         tokens_array = np.array(tokens, dtype="S")
                         if temp_replica in trajectory_group:
                             del trajectory_group[temp_replica]
-                        trajectory_group.create_dataset(temp_replica, data=tokens_array)
+                        trajectory_group.create_dataset(temp_replica, data=tokens_array, dtype=np.float32)
                 break
         except Exception as e:
             logging.error("Waiting for h5 file to become available...", e)

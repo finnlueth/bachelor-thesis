@@ -12,6 +12,7 @@ fn rust_modules(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
 
 #[pyfunction]
 fn strings_to_fasta(strings: Vec<String>, name: String) -> PyResult<String> {
+    /// Converts a vector of strings into FASTA format with numbered frames
     let mut fasta = String::new();
     for (i, sequence) in strings.iter().enumerate() {
         writeln!(&mut fasta, ">{}|frame_{}", name, i).map_err(|e| {
@@ -31,6 +32,7 @@ fn strings_to_fasta(strings: Vec<String>, name: String) -> PyResult<String> {
 
 #[pyfunction]
 fn decode_bytestrings(byte_strings: Vec<Vec<u8>>) -> PyResult<Vec<String>> {
+    /// Decodes a vector of byte strings into a vector of strings
     byte_strings
         .into_iter()
         .map(|bytes| {
@@ -44,6 +46,7 @@ fn decode_bytestrings(byte_strings: Vec<Vec<u8>>) -> PyResult<Vec<String>> {
 
 #[pyfunction]
 fn replace_pdb_coordinates(pdb_template: String, coordinates: PyReadonlyArray3<f32>) -> PyResult<Vec<String>> {
+    /// Replaces the coordinates in a PDB template with the coordinates from a numpy array
     let dims = coordinates.dims();
     let n_frames = dims[0];
     let n_atoms = dims[1];

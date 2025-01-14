@@ -34,18 +34,18 @@ class MDCATHDataset(TrajectoryDataset):
                 ]
             )
 
-            trajectories, trajectory_pdbs = {}, {}
+            aligned_trajectories, aligned_trajectory_pdbs = {}, {}
             for temp in temperatures:
                 for replica in replicas:
-                    logging.error(f"Processing temperature {temp} and replica {replica} for trajectory {name}.")
-                    trajectories[f"{temp}_{replica}"] = rmsd_align(file[name][temp][replica]["coords"][()], structure)
-                    trajectory_pdbs[f"{temp}_{replica}"] = replace_pdb_coordinates(structure, trajectories[f"{temp}_{replica}"])
+                    logging.error(f"RMSD aligning and replacing coordinates for temperature {temp} and replica {replica} for trajectory {name}.")
+                    aligned_trajectories[f"{temp}_{replica}"] = rmsd_align(file[name][temp][replica]["coords"][()], structure)
+                    aligned_trajectory_pdbs[f"{temp}_{replica}"] = replace_pdb_coordinates(structure, aligned_trajectories[f"{temp}_{replica}"])
 
             trajectory = TrajectoryWrapper(
                 name=name,
                 sequence=sequence,
                 structure=structure,
                 # trajectories=trajectories,
-                trajectory_pdbs=trajectory_pdbs,
+                trajectory_pdbs=aligned_trajectory_pdbs,
             )
         return trajectory

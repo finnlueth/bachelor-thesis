@@ -8,18 +8,28 @@ python scripts/tokenize_script.py --input_path /home/finnlueth/mnt/smb/data/data
 """
 
 import argparse
+import json
 import logging
 import os
-from multiprocessing import Pool, Lock, Manager
-import h5py
+import random
+import time
+import typing as T
+import warnings
+from multiprocessing import Lock, Manager, Pool
+from pathlib import Path
 
+import h5py
+import MDAnalysis as mda
 import numpy as np
+import psutil
+from Bio import BiopythonDeprecationWarning
 
 from src.data.load import (
     AtlasDataset,
     MDCATHDataset,
     MisatoDataset,
     TrajectoryDataset,
+    TrajectoryWrapper,
 )
 from src.data.tokenize import (
     Bio2TokenTokenizer,
@@ -27,20 +37,9 @@ from src.data.tokenize import (
     FoldToken4Tokenizer,
     TrajectoryTokenizer,
 )
+from src.utils.errors import TrajectoryAlreadyProcessedError
 from src.utils.logging import setup_logging
 from src.utils.utils import CodeTimer
-from src.utils.errors import TrajectoryAlreadyProcessedError
-import typing as T
-import warnings
-from Bio import BiopythonDeprecationWarning
-import psutil
-from src.data.load import TrajectoryDataset, TrajectoryWrapper
-from pathlib import Path
-import typing as T
-import json
-import time
-import random
-import MDAnalysis as mda
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.simplefilter("ignore", BiopythonDeprecationWarning)
@@ -123,7 +122,6 @@ def _process_trajectory(
         logging.info(f"Processing trajectory {idx} of {len(dataset_class)}")
         trajectory = dataset_class[idx]
 
-        # Calculate size of trajectory_pdbs in GB
         total_bytes = sum(sum(len(pdb.encode()) for pdb in pdbs) for pdbs in trajectory["trajectory_pdbs"].values())
         size_gb = total_bytes / (1024 * 1024 * 1024)
         logging.error(f"Size of trajectory_pdbs for {trajectory['name']}: {size_gb:.2f} GB")
@@ -138,8 +136,8 @@ def _process_trajectory(
 
         for tokenizer in tokenizers:
             tokenized_trajectories = {}
-            for temp_replica, trajectory_pdb in trajectory["trajectory_pdbs"].items():
-                tokenized_trajectories[temp_replica] = tokenizer.tokenize(trajectory_pdb)
+            for temp_replica, trajectory_pdbs in trajectory["trajectory_pdbs"].items():
+                tokenized_trajectories[temp_replica] = tokenizer.tokenize(trajectory_pdbs)
                 logging.error("Tokenized trajectory %s for %s", trajectory["name"], temp_replica)
             write_to_h5_file(
                 save_path=dataset_class.save_path,

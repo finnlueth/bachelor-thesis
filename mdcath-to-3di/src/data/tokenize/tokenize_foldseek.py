@@ -1,4 +1,4 @@
-# # Adapted from https://github.com/samsledje/D-SCRIPT/blob/main/dscript/foldseek.py
+# Adapted from https://github.com/samsledje/D-SCRIPT/blob/main/dscript/foldseek.py
 
 import os
 import shlex

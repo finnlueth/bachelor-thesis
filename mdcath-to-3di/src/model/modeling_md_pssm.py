@@ -7,8 +7,10 @@ import math
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, Union
 
+import pandas as pd
 import torch
 import torch.nn.functional as F
+from IPython.display import display
 from torch import nn
 from torch.nn import (
     BCEWithLogitsLoss,
@@ -17,32 +19,35 @@ from torch.nn import (
     MSELoss,
 )
 from transformers import (
+    PreTrainedModel,
     T5Config,
     T5EncoderModel,
-    T5PreTrainedModel,
     T5Tokenizer,
     modeling_outputs,
     modeling_utils,
 )
 from transformers.modeling_outputs import TokenClassifierOutput
 
-from src.model.modules import T5PSSMHead4 as T5PSSMHead
-
-from IPython.display import display
-import pandas as pd
+from src.model.modules_md_pssm import T5PSSMHead4 as T5PSSMHead
+from src.model.configuration_md_pssm import MDPSSMConfig
 
 
-class T5EncoderModelForPssmGeneration(T5EncoderModel):
-    def __init__(
-        self,
-        config: T5Config,
-    ):
-        super().__init__(config)
+class T5EncoderModelForPssmGeneration(PreTrainedModel):
+    def __init__(self, config: MDPSSMConfig):
+        super().__init__(config=config)
+        
+        self.protein_encoder = T5EncoderModel.from_pretrained(
+            pretrained_model_name_or_path="Rostlab/prot_t5_xl_uniref50",
+            device_map="auto",
+            output_loading_info=False,
+            torch_dtype="auto",
+        )
         
         self.pssm_head = T5PSSMHead(config)
-
+        self.pssm_head.to(self.device)
         for name, init_func in modeling_utils.TORCH_INIT_FUNCTIONS.items():
             setattr(torch.nn.init, name, init_func)
+        self.post_init()
 
 
     def forward(
@@ -56,32 +61,32 @@ class T5EncoderModelForPssmGeneration(T5EncoderModel):
         return_dict=None,
     ):
 
-        print("input_ids", input_ids.shape)
-        print(*input_ids.tolist(), sep="\n")
-        print("attention_mask", attention_mask.shape)
-        print(*attention_mask.tolist(), sep="\n")
-        print("labels", labels.shape)
+        # print("input_ids", input_ids.shape)
+        # print("input_ids", type(input_ids))
+        # print("input_ids", input_ids)
+        # print(*input_ids.tolist(), sep="\n")
+        # print("attention_mask", attention_mask.shape)
+        # print(*attention_mask.tolist(), sep="\n")
+        # print("labels", labels.shape)
 
-        for x in labels.tolist():
-            display(pd.DataFrame(x))
+        # for x in labels.tolist():
+        #     display(pd.DataFrame(x))
 
-        encoder_outputs = super().forward(
+        encoder_outputs = self.protein_encoder.forward(
             input_ids=input_ids,
             attention_mask=attention_mask,
-            inputs_embeds=inputs_embeds,
-            output_attentions=output_attentions,
-            output_hidden_states=output_hidden_states,
             return_dict=return_dict,
         )
+        print("encoder_outputs", encoder_outputs.shape)
 
         hidden_states = encoder_outputs["last_hidden_state"][:, :-1]
-        print("hidden_states", hidden_states.shape)
+        # print("hidden_states", hidden_states.shape)
 
         logits = self.pssm_head(hidden_states)
 
-        print("logits", logits.shape)
-        for x in logits.tolist():
-            display(pd.DataFrame(x))
+        # print("logits", logits.shape)
+        # for x in logits.tolist():
+        #     display(pd.DataFrame(x))
 
         loss = None
         if labels is not None:
@@ -101,7 +106,3 @@ class T5EncoderModelForPssmGeneration(T5EncoderModel):
         #     hidden_states=encoder_outputs.hidden_states,
         #     attentions=encoder_outputs.attentions,
         # )
-
-
-def compute_metrics():
-    return {}

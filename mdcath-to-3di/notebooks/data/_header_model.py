@@ -27,12 +27,12 @@ from transformers import (
 )
 import yaml
 
-from src.model.model import T5EncoderModelForPssmGeneration, compute_metrics
-from src.model.utils import DataCollatorForT5Pssm
+from src.model.modeling_md_pssm import T5EncoderModelForPssmGeneration
+from src.model.utils.data_collator import DataCollatorForT5Pssm
 
-with open('../configs/train.yml', 'r') as file:
+with open('../../configs/train.yml', 'r') as file:
     CONFIG = yaml.safe_load(file)
-with open('../configs/project.yml', 'r') as file:
+with open('../../configs/project.yml', 'r') as file:
     FILE_PATHS = yaml.safe_load(file)['paths']
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu"))

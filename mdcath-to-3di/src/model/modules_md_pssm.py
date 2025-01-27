@@ -23,7 +23,7 @@ class T5PSSMHead1(nn.Module):
         self.bn2 = nn.BatchNorm1d(256)
         self.global_pool = nn.AdaptiveAvgPool1d(1)
 
-    def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
+    def forward(self, hidden_states: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
         hidden_states = hidden_states.transpose(1, 2)
         hidden_states = self.conv1(hidden_states)
         hidden_states = self.bn1(hidden_states)

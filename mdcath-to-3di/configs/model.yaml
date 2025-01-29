@@ -22,7 +22,7 @@ lora:
   use_dora: false
 trainer:
   learning_rate: 0.0001 # 1e-4 == 0.0001, 0.001
-  train_batch_size: 24 # for full lora: 20; for no lora: 300, 192, or 128
+  train_batch_size: 12 # for full lora: 20; for no lora: 300, 192, or 128
   num_epochs: 1 # 24
   eval_batch_size: 20 #32
   eval_strategy: steps

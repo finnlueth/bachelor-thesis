@@ -53,8 +53,8 @@ class PSSMHead(nn.Module):
         Returns:
             torch.Tensor: PSSM predictions [batch_size, seq_len, 20]
         """
-        # Transpose to [batch_size, hidden_dim, seq_len] for Conv1D
-        # Needs channel dimension (hidden_dim) to be before the sequence length dimension
+        # Transpose to [batch_size, hidden_dim, seq_len]
+        # Conv1D needs channel dimension (hidden_dim) to be before the sequence length dimension
         x = x.transpose(1, 2)
 
         x = F.relu(self.conv1(x))
@@ -110,20 +110,21 @@ class T5EncoderModelForPssmGeneration(PreTrainedModel):
             return_dict=return_dict,
         )
 
+        # [batch_size, seq_len, hidden_dim]
         hidden_states = encoder_outputs["last_hidden_state"]
 
+        # [batch_size, seq_len, 20]
         logits = self.pssm_head(hidden_states)
 
         logits = torch.softmax(logits, dim=2)
 
         loss = None
         if labels is not None:
+            # [batch_size * seq_len, 20]
             tensor_truth = labels.flatten(end_dim=1) + 1e-10
             tensor_pred = logits.flatten(end_dim=1) + 1e-10
 
-            mask = None
-            if mask is None:
-                mask = ~torch.any(tensor_truth == -100, dim=1)
+            mask = ~torch.any(tensor_truth == -100, dim=1)
 
             loss_fct = KLDivLoss(reduction="batchmean")
 

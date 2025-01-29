@@ -33,7 +33,7 @@ from src.model.configuration_md_pssm import MDPSSMConfig
 from plms.models.utils import trim_attention_mask
 
 
-class T5PSSMHead(nn.Module):
+class PSSMHead(nn.Module):
     """Head for PSSM generation from T5 embeddings."""
 
     def __init__(self, config):
@@ -53,10 +53,10 @@ class T5PSSMHead(nn.Module):
         Returns:
             torch.Tensor: PSSM predictions [batch_size, seq_len, 20]
         """
-        # Transpose to [batch_size, hidden_dim, seq_len]
+        # Transpose to [batch_size, hidden_dim, seq_len] for Conv1D
+        # Needs channel dimension (hidden_dim) to be before the sequence length dimension
         x = x.transpose(1, 2)
 
-        # Apply CNN layers with ReLU activation and mask
         x = F.relu(self.conv1(x))
         x = self.dropout(x)
 
@@ -67,9 +67,10 @@ class T5PSSMHead(nn.Module):
         x = self.dropout(x)
 
         # Transpose to [batch_size, seq_len, channels]
+        # Back to the original shape
         x = x.transpose(1, 2)
 
-        # Project to 20 dimensions for amino acid probabilities
+        # [batch_size, seq_len, 20]
         pssm = self.final(x)
 
         return pssm
@@ -86,7 +87,7 @@ class T5EncoderModelForPssmGeneration(PreTrainedModel):
             torch_dtype="auto",
         )
 
-        self.pssm_head = T5PSSMHead(config)
+        self.pssm_head = PSSMHead(config)
         self.pssm_head.to(self.device)
 
         for name, init_func in modeling_utils.TORCH_INIT_FUNCTIONS.items():
@@ -110,41 +111,29 @@ class T5EncoderModelForPssmGeneration(PreTrainedModel):
         )
 
         hidden_states = encoder_outputs["last_hidden_state"]
-        attention_mask = trim_attention_mask(attention_mask, trim_end=1)
-
-        # print("input_ids", input_ids.shape)
-        # print("input_ids", input_ids)
-        # print("attention_mask", attention_mask.shape)
-        # print("labels", labels.shape)
-        # print("hidden_states", hidden_states.shape)
 
         logits = self.pssm_head(hidden_states)
-        logits = torch.softmax(logits, dim=-1)
 
-        # print("logits", logits.shape)
-        # for x, y in zip(logits.tolist()[:1], labels.tolist()[:1]):
-        #     display(pd.DataFrame(x))
-        #     print(x)
-        #     display(pd.DataFrame(y))
-        #     print(y)
-        #     print("Sum of first row:", sum(x[0]))
-        #     print("Sum of first row:", sum(y[0]))
-        #     print("-" * 100)
+        logits = torch.softmax(logits, dim=2)
 
         loss = None
         if labels is not None:
+            tensor_truth = labels.flatten(end_dim=1) + 1e-10
+            tensor_pred = logits.flatten(end_dim=1) + 1e-10
+
             mask = None
             if mask is None:
-                mask = ~torch.any(labels == -100, dim=2)
+                mask = ~torch.any(tensor_truth == -100, dim=1)
+
             loss_fct = KLDivLoss(reduction="batchmean")
 
-            masked_logits = logits[mask]
-            masked_labels = labels[mask]
-            masked_logits = torch.log(masked_logits)
+            tensor_pred = tensor_pred[mask]
+            tensor_truth = tensor_truth[mask]
 
-            loss = loss_fct(masked_logits, masked_labels)
+            loss_1 = loss_fct(torch.log(tensor_pred), tensor_truth)
+            loss_2 = loss_fct(torch.log(tensor_truth), tensor_pred)
 
-        print("loss", loss)
+            loss = loss_1 + loss_2
 
         if not return_dict:
             output = (logits, encoder_outputs[2:-1])

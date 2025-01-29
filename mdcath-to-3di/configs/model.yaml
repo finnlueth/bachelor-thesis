@@ -7,7 +7,7 @@ weights_and_biases:
   project: prot-md-pssm
   report_to: wandb
 dataset:
-  path: "../tmp/data/processed/protein_go_concatenated_random_7_3"
+  path: ""
 model:
   name: ProtMDPSSM
   protein_encoder_name: Rostlab/prot_t5_xl_uniref50
@@ -22,11 +22,11 @@ lora:
   use_dora: false
 trainer:
   learning_rate: 0.0001 # 1e-4 == 0.0001, 0.001
-  train_batch_size: 20 # for full lora: 20; for no lora: 300, 192, or 128
+  train_batch_size: 24 # for full lora: 20; for no lora: 300, 192, or 128
   num_epochs: 1 # 24
   eval_batch_size: 20 #32
   eval_strategy: steps
-  eval_steps: 16
+  eval_steps: 64
   eval_on_start: true
   eval_sample_size: 256
   batch_eval_metrics: false
@@ -36,7 +36,7 @@ trainer:
   save_total_limit: 5
   logging_strategy: 'steps'
   logging_steps: 1
-  lr_scheduler_type: "constant" # linear cosine cosine_with_min_lr constant
+  lr_scheduler_type: "cosine" # linear cosine cosine_with_min_lr constant
   warmup_steps: 0
 scheduler:
   min_lr_rate: 0.5

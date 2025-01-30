@@ -31,49 +31,7 @@ from transformers.modeling_outputs import TokenClassifierOutput
 from src.model.configuration_md_pssm import MDPSSMConfig
 
 from plms.models.utils import trim_attention_mask
-
-
-class PSSMHead(nn.Module):
-    """Head for PSSM generation from T5 embeddings."""
-
-    def __init__(self, config):
-        super().__init__()
-
-        self.conv1 = nn.Conv1d(1024, 512, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv1d(512, 256, kernel_size=3, padding=1)
-        self.conv3 = nn.Conv1d(256, 128, kernel_size=3, padding=1)
-        self.final = nn.Linear(128, 20)
-        self.dropout = nn.Dropout(0.1)
-
-    def forward(self, x):
-        """
-        Args:
-            x (torch.Tensor): Embeddings from T5 [batch_size, seq_len, hidden_dim]
-
-        Returns:
-            torch.Tensor: PSSM predictions [batch_size, seq_len, 20]
-        """
-        # Transpose to [batch_size, hidden_dim, seq_len]
-        # Conv1D needs channel dimension (hidden_dim) to be before the sequence length dimension
-        x = x.transpose(1, 2)
-
-        x = F.relu(self.conv1(x))
-        x = self.dropout(x)
-
-        x = F.relu(self.conv2(x))
-        x = self.dropout(x)
-
-        x = F.relu(self.conv3(x))
-        x = self.dropout(x)
-
-        # Transpose to [batch_size, seq_len, channels]
-        # Back to the original shape
-        x = x.transpose(1, 2)
-
-        # [batch_size, seq_len, 20]
-        pssm = self.final(x)
-
-        return pssm
+from src.model.modules_md_pssm import PSSMHead1 as PSSMHead
 
 
 class T5EncoderModelForPssmGeneration(PreTrainedModel):
@@ -89,6 +47,8 @@ class T5EncoderModelForPssmGeneration(PreTrainedModel):
 
         self.pssm_head = PSSMHead(config)
         self.pssm_head.to(self.device)
+
+        self.loss_fct = KLDivLoss(reduction="batchmean")
 
         for name, init_func in modeling_utils.TORCH_INIT_FUNCTIONS.items():
             setattr(torch.nn.init, name, init_func)
@@ -113,36 +73,37 @@ class T5EncoderModelForPssmGeneration(PreTrainedModel):
         # [batch_size, seq_len, hidden_dim]
         hidden_states = encoder_outputs["last_hidden_state"]
 
-        # [batch_size, seq_len, 20]
-        logits = self.pssm_head(hidden_states)
+        # Attention mask ignores EOS token
+        attention_mask = attention_mask.clone()
+        seq_lengths = attention_mask.sum(dim=1) - 1
+        batch_indices = torch.arange(attention_mask.size(0), device=attention_mask.device)
+        attention_mask[batch_indices, seq_lengths] = 0
+        
+        hidden_states = hidden_states * attention_mask.unsqueeze(-1)
 
-        logits = torch.softmax(logits, dim=2)
+        # [batch_size, seq_len, 20]
+        pssm = self.pssm_head(hidden_states)
 
         loss = None
         if labels is not None:
             # [batch_size * seq_len, 20]
-            tensor_truth = labels.flatten(end_dim=1) + 1e-10
-            tensor_pred = logits.flatten(end_dim=1) + 1e-10
+            tensor_truth = labels.flatten(end_dim=1)
+            tensor_pred = pssm.flatten(end_dim=1)
 
             mask = ~torch.any(tensor_truth == -100, dim=1)
-
-            loss_fct = KLDivLoss(reduction="batchmean")
 
             tensor_pred = tensor_pred[mask]
             tensor_truth = tensor_truth[mask]
 
-            loss_1 = loss_fct(torch.log(tensor_pred), tensor_truth)
-            loss_2 = loss_fct(torch.log(tensor_truth), tensor_pred)
-
-            loss = loss_1 + loss_2
+            loss = self.loss_fct(torch.log(tensor_pred), tensor_truth)
 
         if not return_dict:
-            output = (logits, encoder_outputs[2:-1])
+            output = (pssm, encoder_outputs[2:-1])
             return ((loss,) + output) if loss is not None else output
 
         return TokenClassifierOutput(
             loss=loss,
-            logits=logits,
+            logits=pssm,
             hidden_states=encoder_outputs.hidden_states,
             attentions=encoder_outputs.attentions,
         )

@@ -45,7 +45,7 @@ class T5EncoderModelForPssmGeneration(PreTrainedModel):
             torch_dtype="auto",
         )
 
-        self.pssm_head = PSSMHead(config)
+        self.pssm_head = PSSMHead()
         self.pssm_head.to(self.device)
 
         self.loss_fct = KLDivLoss(reduction="batchmean")
@@ -78,7 +78,7 @@ class T5EncoderModelForPssmGeneration(PreTrainedModel):
         seq_lengths = attention_mask.sum(dim=1) - 1
         batch_indices = torch.arange(attention_mask.size(0), device=attention_mask.device)
         attention_mask[batch_indices, seq_lengths] = 0
-        
+
         hidden_states = hidden_states * attention_mask.unsqueeze(-1)
 
         # [batch_size, seq_len, 20]
@@ -87,15 +87,15 @@ class T5EncoderModelForPssmGeneration(PreTrainedModel):
         loss = None
         if labels is not None:
             # [batch_size * seq_len, 20]
-            tensor_truth = labels.flatten(end_dim=1)
-            tensor_pred = pssm.flatten(end_dim=1)
+            target = labels.flatten(end_dim=1)
+            pred = pssm.flatten(end_dim=1)
 
-            mask = ~torch.any(tensor_truth == -100, dim=1)
+            mask = ~torch.any(target == -100, dim=1)
 
-            tensor_pred = tensor_pred[mask]
-            tensor_truth = tensor_truth[mask]
+            pred = pred[mask]
+            target = target[mask]
 
-            loss = self.loss_fct(torch.log(tensor_pred), tensor_truth)
+            loss = self.loss_fct(torch.log(pred), target)
 
         if not return_dict:
             output = (pssm, encoder_outputs[2:-1])

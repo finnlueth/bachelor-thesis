@@ -28,7 +28,7 @@ trainer:
   eval_strategy: steps
   eval_steps: 64
   eval_on_start: true
-  eval_sample_size: 256
+  eval_sample_size: 100
   batch_eval_metrics: false
   remove_unused_columns: false
   save_strategy: 'no' #steps

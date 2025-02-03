@@ -4,17 +4,20 @@ import random
 import re
 from datetime import datetime
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import torch
+import wandb
 import yaml
 from datasets import load_from_disk
 from peft import (
     LoraConfig,
-    get_peft_model,
     PeftConfig,
+    get_peft_model,
 )
 from peft.utils.constants import TRANSFORMERS_MODELS_TO_LORA_TARGET_MODULES_MAPPING
+from plms.models import ProtT5
 from transformers import (
     AutoConfig,
     AutoTokenizer,
@@ -22,13 +25,8 @@ from transformers import (
     TrainingArguments,
 )
 
-import wandb
 import src.model.utils as utils
-
 from src.plots.train_plots import plot_training_history
-import matplotlib.pyplot as plt
-
-from plms.models import ProtT5
 
 # from accelerate.distributed import DistributedDataParallelKwargs
 # from src.model.configuration_protein_clip import ProtT5CLIPConfig

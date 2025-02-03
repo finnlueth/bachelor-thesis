@@ -104,6 +104,5 @@ class T5EncoderModelForPssmGeneration(PreTrainedModel):
         return TokenClassifierOutput(
             loss=loss,
             logits=pssm,
-            hidden_states=encoder_outputs.hidden_states,
-            attentions=encoder_outputs.attentions,
+            hidden_states=encoder_outputs["last_hidden_state"],
         )

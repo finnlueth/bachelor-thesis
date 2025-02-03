@@ -12,26 +12,25 @@ from transformers import (
 
 
 class PSSMHead1(nn.Module):
-    def __init__(self, config):
+    """Head for PSSM generation from T5 embeddings. based on https://github.com/hefeda/PGP/blob/master/prott5_batch_predictor.py#L144"""
+    def __init__(self):
+        """
+        Args:
+            config (MDPSSMConfig): Configuration object for the model
+        """
         super().__init__()
-        self.feature_extractor = nn.Sequential(
+        self.classifier = nn.Sequential(
             nn.Conv1d(1024, 32, kernel_size=7, padding=3),  # 7x32
             nn.ReLU(),
             nn.Dropout(0.25),
+            nn.Conv1d(32, 20, kernel_size=7, padding=3)
         )
-
-        self.dssp3_classifier = torch.nn.Sequential(
-            nn.Conv1d(32, 3, kernel_size=7, padding=3)  # 7
-        )
-
-        self.classifier = torch.nn.Sequential(nn.Conv1d(32, 20, kernel_size=7, padding=3))
 
     def forward(self, x):
-        # IN: X = (B x L x F); OUT: (B x F x L, 1)
-        x = x.permute(0, 2, 1).unsqueeze(dim=-1)
-        x = self.feature_extractor(x)  # OUT: (B x 32 x L x 1)
-        pssm = self.classifier(x).squeeze(dim=-1).permute(0, 2, 1)  # OUT: (B x L x 20)
-        pssm = torch.softmax(pssm, dim=2)
+        x = x.transpose(1, 2)
+        x = self.classifier(x).squeeze(dim=-1)
+        x = x.transpose(1, 2)
+        pssm = torch.softmax(x, dim=2)
         return pssm
 
 

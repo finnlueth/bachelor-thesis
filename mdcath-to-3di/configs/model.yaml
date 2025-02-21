@@ -1,0 +1,47 @@
+project_name: prot-md-pssm
+custom_run_name: ""
+seed: 42 # 42
+verbose: false
+weights_and_biases:
+  enabled: true
+  project: prot-md-pssm
+  report_to: wandb
+dataset:
+  path: ""
+model:
+  name: ProtMDPSSM
+  protein_encoder_name: Rostlab/prot_t5_xl_uniref50
+  # protein_encoder_name: Rostlab/ProstT5
+  reload_from_checkpoint_path: ""
+lora:
+  enabled: false
+  r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  use_rslora: false
+  use_dora: false
+trainer:
+  learning_rate: 0.0001 # 1e-4 == 0.0001, 0.001
+  train_batch_size: 12 # for full lora: 20; for no lora: 300, 192, or 128
+  num_epochs: 1 # 24
+  eval_batch_size: 20 #32
+  eval_strategy: steps
+  eval_steps: 64
+  eval_on_start: true
+  eval_sample_size: 100
+  batch_eval_metrics: false
+  remove_unused_columns: false
+  save_strategy: 'no' #steps
+  save_steps: 300
+  save_total_limit: 5
+  logging_strategy: 'steps'
+  logging_steps: 1
+  lr_scheduler_type: "cosine" # linear cosine cosine_with_min_lr constant
+  warmup_steps: 0
+scheduler:
+  min_lr_rate: 0.5
+  # num_warmup_steps: 25
+  # num_flat_steps: 100
+  # num_training_steps: 0
+  # num_cycles: 1
+  # min_lr_ratio: 0.5

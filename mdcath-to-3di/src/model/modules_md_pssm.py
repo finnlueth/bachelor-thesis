@@ -20,7 +20,7 @@ class PSSMHead1(nn.Module):
         """
         super().__init__()
         self.classifier = nn.Sequential(
-            nn.Conv1d(1024, 32, kernel_size=7, padding=3),  # 7x32
+            nn.Conv1d(1024, 32, kernel_size=7, padding=3),
             nn.ReLU(),
             nn.Dropout(0.25),
             nn.Conv1d(32, 20, kernel_size=7, padding=3)
@@ -28,7 +28,7 @@ class PSSMHead1(nn.Module):
 
     def forward(self, x):
         x = x.transpose(1, 2)
-        x = self.classifier(x).squeeze(dim=-1)
+        x = self.classifier(x)
         x = x.transpose(1, 2)
         pssm = torch.softmax(x, dim=2)
         return pssm
@@ -37,12 +37,12 @@ class PSSMHead1(nn.Module):
 class PSSMHead2(nn.Module):
     """Head for PSSM generation from T5 embeddings."""
 
-    def __init__(self, config):
+    def __init__(self):
         super().__init__()
 
-        self.conv1 = nn.Conv1d(1024, 512, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv1d(512, 256, kernel_size=3, padding=1)
-        self.conv3 = nn.Conv1d(256, 128, kernel_size=3, padding=1)
+        self.conv1 = nn.Conv1d(1024, 512, kernel_size=7, padding=3)
+        self.conv2 = nn.Conv1d(512, 256, kernel_size=7, padding=3)
+        self.conv3 = nn.Conv1d(256, 128, kernel_size=7, padding=3)
         self.final = nn.Linear(128, 20)
         self.dropout = nn.Dropout(0.1)
 

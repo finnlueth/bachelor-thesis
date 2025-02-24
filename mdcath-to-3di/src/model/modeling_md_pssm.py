@@ -31,22 +31,21 @@ from transformers.modeling_outputs import TokenClassifierOutput
 from src.model.configuration_md_pssm import MDPSSMConfig
 
 from plms.models.utils import trim_attention_mask
-from src.model.modules_md_pssm import PSSMHead1 as PSSMHead
+from src.model.modules_md_pssm import PSSMHead2 as PSSMHead
 
 
 class T5EncoderModelForPssmGeneration(PreTrainedModel):
     def __init__(self, config: MDPSSMConfig):
         super().__init__(config=config)
-
+        device_map = config.device if hasattr(config, "device") else "auto"
         self.protein_encoder = T5EncoderModel.from_pretrained(
             pretrained_model_name_or_path="Rostlab/prot_t5_xl_uniref50",
-            device_map="auto",
+            device_map=device_map,
             output_loading_info=False,
             torch_dtype="auto",
         )
 
         self.pssm_head = PSSMHead()
-        self.pssm_head.to(self.device)
 
         self.loss_fct = KLDivLoss(reduction="batchmean")
 

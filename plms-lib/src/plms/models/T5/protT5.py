@@ -44,8 +44,21 @@ class ProtT5(ProteinLanguageModel):
         input_ids: Union[torch.Tensor, List[List[int]]],
         attention_mask: Optional[Union[torch.Tensor, List[List[int]]]] = None,
     ) -> torch.Tensor:
-        outputs = self.model(
+
+        hidden_states = self.model(
             input_ids=input_ids,
             attention_mask=attention_mask,
+        )["last_hidden_state"]
+        
+        
+        
+        hidden_states = self.trim_hidden_states(
+            hidden_states,
+            attention_mask,
+            self.trim_value,
         )
-        return outputs.last_hidden_state
+
+        if self.mean_pooling:
+            hidden_states = self.mean_pooling(hidden_states, attention_mask)
+
+        return hidden_states

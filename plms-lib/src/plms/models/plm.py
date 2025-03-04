@@ -25,13 +25,14 @@ class ProteinLanguageModel(PreTrainedModel, ABC):
         self.output_loading_info = kwargs.get("output_loading_info", False)
         self._device = kwargs.get("device", "cuda:0")
         self.mean_pooling = kwargs.get("mean_pooling", False)
+        self.trim_value = kwargs.get("trim_value", 0)
 
         self.tokenizer: PreTrainedTokenizer = self._load_tokenizer()
         self.model: PreTrainedModel = self._load_model()
 
     @abstractmethod
     def _load_config(self) -> PretrainedConfig:
-        """Load the underlying transformer model.
+        """Load the underlying transformer model config.
 
         Returns:
             The loaded model
@@ -85,7 +86,9 @@ class ProteinLanguageModel(PreTrainedModel, ABC):
         """
         Remove special tokens (pad, cls, sep, eos, etc.) from embeddings.
         """
-        hidden_states = hidden_states * attention_mask.unsqueeze(-1)
+        mask_expanded = attention_mask.unsqueeze(-1).expand(hidden_states.size())
+        masked_embeddings = torch.where(mask_expanded == 1, hidden_states, trim_value)
+        return masked_embeddings
 
     @staticmethod
     def mean_pooling(hidden_states: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:

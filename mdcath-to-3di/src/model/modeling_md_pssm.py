@@ -31,7 +31,7 @@ from transformers.modeling_outputs import TokenClassifierOutput
 from src.model.configuration_md_pssm import MDPSSMConfig
 
 from plms.models.utils import trim_attention_mask
-from src.model.modules_md_pssm import PSSMHead2 as PSSMHead
+from src.model.modules_md_pssm import PSSMHead1 as PSSMHead
 
 
 class T5EncoderModelForPssmGeneration(PreTrainedModel):

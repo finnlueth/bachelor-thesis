@@ -1,6 +1,6 @@
 project_name: prot-md-pssm
 custom_run_name: "full dataset"
-seed: 42 # 42
+seed: 69 # 42
 verbose: false
 weights_and_biases:
   enabled: true
@@ -23,12 +23,12 @@ lora:
 trainer:
   learning_rate: 0.001 # 1e-4 == 0.0001, 0.001
   train_batch_size: 10 # for full lora: 10; for no lora: 300, 192, or 128
-  num_epochs: 1 # 24
-  eval_batch_size: 20 #32
+  num_epochs: 2 # 24
+  eval_batch_size: 32 #32
   eval_strategy: steps
-  eval_steps: 64
+  eval_steps: 32
   eval_on_start: true
-  eval_sample_size: 100
+  eval_sample_size: 128
   batch_eval_metrics: false
   remove_unused_columns: false
   save_strategy: 'no' #steps

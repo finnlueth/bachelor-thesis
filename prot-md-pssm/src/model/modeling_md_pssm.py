@@ -73,7 +73,7 @@ class T5EncoderModelForPssmGeneration(PreTrainedModel):
         hidden_states = encoder_outputs["last_hidden_state"]
 
         # Attention mask ignores EOS token
-        attention_mask = attention_mask.clone()
+        # attention_mask = attention_mask.clone()
         seq_lengths = attention_mask.sum(dim=1) - 1
         batch_indices = torch.arange(attention_mask.size(0), device=attention_mask.device)
         attention_mask[batch_indices, seq_lengths] = 0

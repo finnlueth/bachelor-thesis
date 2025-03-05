@@ -13,7 +13,7 @@ class ProtT5(ProteinLanguageModel):
     def _load_config(self) -> PretrainedConfig:
         return PretrainedConfig(name_or_path=self.model_name_or_path)
 
-    def _load_tokenizer(self) -> T5Tokenizer:
+    def get_tokenizer(self) -> T5Tokenizer:
         tokenizer = T5Tokenizer.from_pretrained(
             pretrained_model_name_or_path=self.model_name_or_path,
             do_lower_case=False,
@@ -31,13 +31,11 @@ class ProtT5(ProteinLanguageModel):
         )
         return model
 
-    def update_attention_mask(self, hidden_states: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
+    def update_attention_mask(self, attention_mask: torch.Tensor) -> torch.Tensor:
         seq_lengths = attention_mask.sum(dim=1) - 1
         batch_indices = torch.arange(attention_mask.size(0), device=attention_mask.device)
         attention_mask[batch_indices, seq_lengths] = 0
-
-        hidden_states = hidden_states * attention_mask.unsqueeze(-1)
-        return hidden_states
+        return attention_mask
 
     def forward(
         self,
@@ -49,9 +47,9 @@ class ProtT5(ProteinLanguageModel):
             input_ids=input_ids,
             attention_mask=attention_mask,
         )["last_hidden_state"]
-        
-        
-        
+
+        attention_mask = self.update_attention_mask(attention_mask)
+
         hidden_states = self.trim_hidden_states(
             hidden_states,
             attention_mask,

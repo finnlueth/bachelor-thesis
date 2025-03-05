@@ -5,7 +5,7 @@
 ### Training
 ```sh
 cd scripts
-python train.py
+# python train.py
 
 nohup python train.py &
 ```

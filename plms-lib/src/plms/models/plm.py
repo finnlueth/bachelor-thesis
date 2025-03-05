@@ -3,12 +3,12 @@ import torch
 from typing import List, Union, Optional
 from transformers import PreTrainedModel, PreTrainedTokenizer, PretrainedConfig
 from transformers.modeling_outputs import BaseModelOutput
-
+from plms.configurations.configuration_plm import PLMConfig
 
 class ProteinLanguageModel(PreTrainedModel, ABC):
     """Abstract base class for protein language model wrappers."""
 
-    def __init__(self, model_name_or_path: str, *args, **kwargs):
+    def __init__(self, model_name_or_path: str, config: Optional[PLMConfig] = None, *args, **kwargs):
         """Initialize the protein language model wrapper.
 
         Args:
@@ -27,7 +27,7 @@ class ProteinLanguageModel(PreTrainedModel, ABC):
         self.mean_pooling = kwargs.get("mean_pooling", False)
         self.trim_value = kwargs.get("trim_value", 0)
 
-        self.tokenizer: PreTrainedTokenizer = self._load_tokenizer()
+        # self.tokenizer: PreTrainedTokenizer = self._load_tokenizer()
         self.model: PreTrainedModel = self._load_model()
 
     @abstractmethod
@@ -40,7 +40,7 @@ class ProteinLanguageModel(PreTrainedModel, ABC):
         pass
 
     @abstractmethod
-    def _load_tokenizer(self) -> PreTrainedTokenizer:
+    def get_tokenizer(self) -> PreTrainedTokenizer:
         """Load the underlying tokenizer.
 
         Returns:
@@ -81,17 +81,26 @@ class ProteinLanguageModel(PreTrainedModel, ABC):
         """
         pass
 
+    def _get_embeddings(self, input_ids: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
+        """Get the embeddings from the model.
+        """
+        self.model.eval()
+        with torch.no_grad():
+            outputs = self.model(input_ids, attention_mask)
+            hidden_states = outputs.last_hidden_state
+        return hidden_states
+
     @staticmethod
     def trim_hidden_states(hidden_states: torch.Tensor, attention_mask: torch.Tensor, trim_value: int = 0) -> torch.Tensor:
         """
-        Remove special tokens (pad, cls, sep, eos, etc.) from embeddings.
+        Remove special tokens from embeddings.
         """
         mask_expanded = attention_mask.unsqueeze(-1).expand(hidden_states.size())
         masked_embeddings = torch.where(mask_expanded == 1, hidden_states, trim_value)
         return masked_embeddings
 
     @staticmethod
-    def mean_pooling(hidden_states: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
+    def mean_pooling(hidden_states: torch.Tensor, attention_mask: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
         Performs mean pooling only over tokens where attention mask is 1.
         Args:
@@ -100,6 +109,9 @@ class ProteinLanguageModel(PreTrainedModel, ABC):
         Returns:
             Mean pooled representation of shape (batch_size, hidden_dim)
         """
+        if attention_mask is None:
+            return torch.mean(hidden_states, dim=1)
+
         mask_expanded = attention_mask.unsqueeze(-1).expand(hidden_states.size())
         masked_embeddings = hidden_states * mask_expanded
         sum_embeddings = torch.sum(masked_embeddings, dim=1)

@@ -1,0 +1,4 @@
+data
+tokenizers/alphafold_tokenizer
+tokenizers/bio2token_tokenizer
+tokenizers/foldtoken_tokenizer

@@ -1,37 +1,31 @@
-from ..plm import ProteinLanguageModel
-from transformers import T5EncoderModel, T5Tokenizer, PreTrainedTokenizer, PreTrainedModel, PretrainedConfig
+from typing import List, Optional, Union
+
 import torch
-from typing import Union, Optional, List
+from transformers import PretrainedConfig, PreTrainedModel, PreTrainedTokenizer, T5EncoderModel, T5Tokenizer
+
+from ..base_plm import ProteinLanguageModel
+from ...configurations import PLMConfig
 
 
 class ProtT5(ProteinLanguageModel):
     """Wrapper for ProtT5 models."""
 
-    def __init__(self, model_name_or_path: str, *args, **kwargs):
-        super().__init__(model_name_or_path, *args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-    def _load_config(self) -> PretrainedConfig:
-        return PretrainedConfig(name_or_path=self.model_name_or_path)
-
-    def get_tokenizer(self) -> T5Tokenizer:
-        tokenizer = T5Tokenizer.from_pretrained(
-            pretrained_model_name_or_path=self.model_name_or_path,
-            do_lower_case=False,
-            use_fast=True,
-            legacy=False,
-        )
-        return tokenizer
+    def get_default_config(self, name_or_path: str) -> PretrainedConfig:
+        return PLMConfig(name_or_path=name_or_path)
 
     def _load_model(self) -> T5EncoderModel:
         model = T5EncoderModel.from_pretrained(
-            pretrained_model_name_or_path=self.model_name_or_path,
-            device_map=self._device,
-            output_loading_info=self.output_loading_info,
+            pretrained_model_name_or_path=self.config.name_or_path,
+            device_map=self.config.device,
+            output_loading_info=self.config.output_loading_info,
             torch_dtype="auto",
         )
         return model
 
-    def update_attention_mask(self, attention_mask: torch.Tensor) -> torch.Tensor:
+    def update_attention_mask(attention_mask: torch.Tensor) -> torch.Tensor:
         seq_lengths = attention_mask.sum(dim=1) - 1
         batch_indices = torch.arange(attention_mask.size(0), device=attention_mask.device)
         attention_mask[batch_indices, seq_lengths] = 0
@@ -42,7 +36,6 @@ class ProtT5(ProteinLanguageModel):
         input_ids: Union[torch.Tensor, List[List[int]]],
         attention_mask: Optional[Union[torch.Tensor, List[List[int]]]] = None,
     ) -> torch.Tensor:
-
         hidden_states = self.model(
             input_ids=input_ids,
             attention_mask=attention_mask,

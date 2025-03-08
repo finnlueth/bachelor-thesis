@@ -34,7 +34,7 @@ def sample_sequence():
 @pytest.fixture
 def sample_batch():
     """Return a sample batch of protein sequences for testing."""
-    return ["MDCATH", "PROTEIN"]
+    return ["MDCATH", "PROTEIN", "ROSTLAB"]
 
 
 @pytest.fixture

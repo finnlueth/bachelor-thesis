@@ -165,3 +165,6 @@ tmp/
 
 # wandb
 wandb/
+
+
+nohup*.out

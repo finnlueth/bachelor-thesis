@@ -2,6 +2,24 @@
 
 ## Installation
 
+### Training
+```sh
+cd scripts
+# python train.py
+
+nohup python train.py &
+```
+
+or for distributed (multi gpu) training
+
+```sh
+cd scripts
+accelerate launch train_ddp.py
+
+nohup accelerate launch --config_file ../configs/accelerate_default_config.yaml train_ddp.py &
+```
+
+
 ### Micromamba
 
 ```sh

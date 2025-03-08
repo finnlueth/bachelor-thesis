@@ -22,6 +22,7 @@ dependencies = [
     "transformers",
     "datasets",
     "pydantic",
+    "pytest",
 ]
 
 [project.urls]
@@ -38,3 +39,15 @@ line-length = 128
 [tool.pylint]
 max-line-length = 128
 disable = []
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --doctest-modules"
+testpaths = [
+    "tests",
+]
+python_files = ["test_*.py"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
+]

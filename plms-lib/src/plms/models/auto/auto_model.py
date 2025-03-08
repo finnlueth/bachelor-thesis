@@ -19,4 +19,4 @@ MODEL_TYPES = {
 def auto_model(model_name: str, *args, **kwargs) -> PreTrainedModel:
     if model_name not in MODEL_TYPES:
         raise ValueError(f"Model {model_name} not found in MODEL_TYPES")
-    return MODEL_TYPES[model_name](model_name=model_name, *args, **kwargs)
+    return MODEL_TYPES[model_name](model_name_or_path=model_name, *args, **kwargs)

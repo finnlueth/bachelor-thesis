@@ -37,16 +37,15 @@ from src.model.modules_md_pssm import PSSMHead1 as PSSMHead
 class T5EncoderModelForPssmGeneration(PreTrainedModel):
     def __init__(self, config: MDPSSMConfig):
         super().__init__(config=config)
-
+        device_map = config.device if hasattr(config, "device") else "auto"
         self.protein_encoder = T5EncoderModel.from_pretrained(
             pretrained_model_name_or_path="Rostlab/prot_t5_xl_uniref50",
-            device_map="auto",
+            device_map=device_map,
             output_loading_info=False,
             torch_dtype="auto",
         )
 
         self.pssm_head = PSSMHead()
-        self.pssm_head.to(self.device)
 
         self.loss_fct = KLDivLoss(reduction="batchmean")
 
@@ -74,7 +73,7 @@ class T5EncoderModelForPssmGeneration(PreTrainedModel):
         hidden_states = encoder_outputs["last_hidden_state"]
 
         # Attention mask ignores EOS token
-        attention_mask = attention_mask.clone()
+        # attention_mask = attention_mask.clone()
         seq_lengths = attention_mask.sum(dim=1) - 1
         batch_indices = torch.arange(attention_mask.size(0), device=attention_mask.device)
         attention_mask[batch_indices, seq_lengths] = 0

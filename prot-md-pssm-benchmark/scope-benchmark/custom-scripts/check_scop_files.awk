@@ -1,5 +1,7 @@
 #!/usr/bin/mawk -f
 
+# mawk -f check_scop_files.awk ../data/scop_lookup.fix.tsv scop_files.txt
+
 # First pass: Read lookup file and store PDB IDs
 FNR==NR {
     pdb_in_lookup[$1] = 1

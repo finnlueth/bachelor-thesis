@@ -1,0 +1,17 @@
+[project]
+name = "tokenization-tests"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Finn Lueth", email = "finn@lueth.net" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.workspace]
+members = ["benchmarks/foldtoken/foldtoken5", "benchmarks/foldtoken/foldtoken", "benchmarks/foldtoken"]

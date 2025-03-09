@@ -18,8 +18,3 @@ awk '{ len = $3 - 2; print "0\t"$1"\t0\t1.00\t0\t0\t"(len-1)"\t"len"\t0\t"(len-1
 
 "${MMSEQS}" tsv2db ${FOLDSEEK_OUT}/fake_aln.tsv ${FOLDSEEK_OUT}/fake_aln_db --output-dbtype 5
 "${MMSEQS}" result2profile ${FOLDSEEK_OUT}/inputdb_ss ${FOLDSEEK_OUT}/inputdb_ss ${FOLDSEEK_OUT}/fake_aln_db ${PSSM_OUT}/profile.tsv ${VICTORS_PARAMETERS}
-
-
-
-
-

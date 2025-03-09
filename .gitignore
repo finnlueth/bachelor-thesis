@@ -168,3 +168,5 @@ wandb/
 
 
 nohup*.out
+
+.vscode/

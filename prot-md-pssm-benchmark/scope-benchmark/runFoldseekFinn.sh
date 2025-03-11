@@ -28,6 +28,7 @@ if [ "$RUN_FOLDSEEK" = true ]; then
 else
     echo "Foldseek not run, attempting to use existing alignments"
 fi
+
 ## end timing
 date
 

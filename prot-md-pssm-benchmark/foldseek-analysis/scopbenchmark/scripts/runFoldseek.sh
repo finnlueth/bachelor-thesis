@@ -3,8 +3,8 @@
 ## start timing
 date 
 
-## foldseek easy-search (combination of all convert2db + prefilter + align)
-# ./foldseek/build/src/foldseek easy-search ./benchmark/data/scop-pdb/ ./benchmark/data/scop-pdb/ ./benchmark/alignResults/rawoutput/foldseekaln ./benchmark/alignResults/tmp/ --threads 64 -s 9.5 --max-seqs 2000 -e 10
+# foldseek easy-search (combination of all convert2db + prefilter + align)
+./foldseek/build/src/foldseek easy-search ./benchmark/data/scop-pdb/ ./benchmark/data/scop-pdb/ ./benchmark/alignResults/rawoutput/foldseekaln ./benchmark/alignResults/tmp/ --threads 64 -s 9.5 --max-seqs 2000 -e 10
 
 ## end timing
 date

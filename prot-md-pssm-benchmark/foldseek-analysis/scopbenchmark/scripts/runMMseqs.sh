@@ -9,7 +9,6 @@ mmseqs search ./scop-fasta ./scop-fasta ./benchmark/alignResults/rawoutput/mmseq
 ## end timing
 date
 
-
 ## generate ROCX file
 ./bench.awk ../data/scop_lookup.fix.tsv <(cat ../alignResults/rawoutput/mmseqsaln) > ../alignResults/rocx/mmseqs.rocx
 

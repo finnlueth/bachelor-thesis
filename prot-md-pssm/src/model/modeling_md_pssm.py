@@ -1,6 +1,5 @@
 # import src.utils.logging as logging
 # import src.models.utils.modules as modules
-
 import copy
 import inspect
 import math
@@ -29,8 +28,9 @@ from transformers import (
 from transformers.modeling_outputs import TokenClassifierOutput
 
 from src.model.configuration_md_pssm import MDPSSMConfig
+from src.model.modeling_outputs import PSSMOutput
 
-from plms.models.utils import trim_attention_mask
+# from plms.models.utils import trim_attention_mask
 from src.model.modules_md_pssm import PSSMHead1 as PSSMHead
 
 
@@ -73,7 +73,7 @@ class T5EncoderModelForPssmGeneration(PreTrainedModel):
         hidden_states = encoder_outputs["last_hidden_state"]
 
         # Attention mask ignores EOS token
-        # attention_mask = attention_mask.clone()
+        attention_mask = attention_mask.clone()
         seq_lengths = attention_mask.sum(dim=1) - 1
         batch_indices = torch.arange(attention_mask.size(0), device=attention_mask.device)
         attention_mask[batch_indices, seq_lengths] = 0
@@ -100,8 +100,9 @@ class T5EncoderModelForPssmGeneration(PreTrainedModel):
             output = (pssm, encoder_outputs[2:-1])
             return ((loss,) + output) if loss is not None else output
 
-        return TokenClassifierOutput(
+        return PSSMOutput(
             loss=loss,
-            logits=pssm,
-            hidden_states=encoder_outputs["last_hidden_state"],
+            pssms=pssm,
+            hidden_states=encoder_outputs["last_hidden_state"] if output_hidden_states else None,
+            masks=attention_mask,
         )

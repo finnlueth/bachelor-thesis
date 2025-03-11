@@ -8,9 +8,9 @@ BENCHMARK="bench.noselfhit"
 FOLDSEEK_ANALYSIS_SCOP_DIR=../foldseek-analysis/scopbenchmark
 
 LOOKUP_FILE=${FOLDSEEK_ANALYSIS_SCOP_DIR}/data/scop_lookup.fix.tsv
-SEQUENCE_FASTA=./data/scope40_sequences.fasta
+SEQUENCE_FASTA=./data/scope40_sequences_3Di.fasta
 
-OUT_DIR=./out/mmseqs_benchmark/
+OUT_DIR=./out/mmseqs_3Di_benchmark/
 ALIGN_DIR_RAW=${OUT_DIR}/alignResults/rawoutput/
 ALIGN_DIR_TMP=${OUT_DIR}/alignResults/tmp
 ALIGN_DIR_ROCX=${OUT_DIR}/alignResults/rocx

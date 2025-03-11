@@ -3,12 +3,12 @@ import pandas as pd
 import numpy as np
 
 
-def plot_scope_benchmarks(file_paths: list[str]):
+def plot_scope_benchmarks(file_paths: dict[str, str]):
     """
     Plots SCOPe benchmark sensitivity up to the first false positive for multiple .rocx files.
     
     Parameters:
-        file_paths (list): List of file paths to .rocx files.
+        file_paths (dict): Dictionary mapping display names to .rocx file paths.
     """
     
     plt.rcParams['figure.dpi'] = 300
@@ -17,10 +17,10 @@ def plot_scope_benchmarks(file_paths: list[str]):
     titles = ["Family", "Superfamily", "Fold"]
     y_labels = ["FAM", "SFAM", "FOLD"]
 
-    colors = ['black', 'blue', 'red', 'green', 'purple', 'orange']
+    colors = ['black', 'blue', 'red', 'orange', 'green', 'purple']
 
-    for idx, file_path in enumerate(file_paths):
-        df = pd.read_csv(file_path, sep="\t")
+    for idx, (name, path) in enumerate(file_paths.items()):
+        df = pd.read_csv(path, sep="\t")
 
         fraction_queries = np.linspace(0, 1, len(df))
 
@@ -28,8 +28,8 @@ def plot_scope_benchmarks(file_paths: list[str]):
             df_sorted = df.sort_values(by=ylabel, ascending=False)
             axes[i].plot(
                 fraction_queries, df_sorted[ylabel],
-                label=file_path, 
-                color=colors[idx % len(colors)], 
+                label=name,
+                color=colors[idx % len(colors)],
                 linewidth=0.8,
                 linestyle='-'
             )
@@ -38,7 +38,7 @@ def plot_scope_benchmarks(file_paths: list[str]):
             axes[i].set_title(f"SCOPe Benchmark - {titles[i]}")
             axes[i].grid()
 
-    axes[-1].legend(title="File Path", loc="upper right", fontsize=8)
+    axes[-1].legend(title="Method", loc="upper right", fontsize=8)
 
     plt.tight_layout()
     plt.show()

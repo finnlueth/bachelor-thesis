@@ -25,8 +25,8 @@ mkdir -p ${ALIGN_DIR_ALN}
 date 
 echo "CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES"
 if [ "$RUN_FOLDSEEK" = true ]; then
-    # ${FOLDSEEK} createdb ${SEQUENCE_FASTA} ${ALIGN_DIR_TMP}/queryDB --prostt5-model ./data/prostt5/prostt5_out/prostt5-f16.gguf --gpu 1
-    # ${FOLDSEEK} search ${ALIGN_DIR_TMP}/queryDB ${ALIGN_DIR_TMP}/queryDB ${ALIGN_DIR_ALN} ${ALIGN_DIR_TMP} --threads 8 -s 9.5 --max-seqs 2000 -e 10
+    ${FOLDSEEK} createdb ${SEQUENCE_FASTA} ${ALIGN_DIR_TMP}/queryDB --prostt5-model ./data/prostt5/prostt5_out/prostt5-f16.gguf --gpu 1
+    ${FOLDSEEK} search ${ALIGN_DIR_TMP}/queryDB ${ALIGN_DIR_TMP}/queryDB ${ALIGN_DIR_ALN} ${ALIGN_DIR_TMP} --threads 8 -s 9.5 --max-seqs 2000 -e 10
     ${FOLDSEEK} convertalis ${ALIGN_DIR_TMP}/queryDB ${ALIGN_DIR_TMP}/queryDB ${ALIGN_DIR_ALN} ${ALIGN_DIR_RAW}/foldseekaln
 else
     echo "Foldseek not run, attempting to use existing alignments"

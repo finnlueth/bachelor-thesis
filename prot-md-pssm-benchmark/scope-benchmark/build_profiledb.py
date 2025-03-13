@@ -7,6 +7,7 @@ import struct
 import numpy as np
 import shutil
 import subprocess
+from tqdm import tqdm
 
 #############################
 # pssm_to_db functionality
@@ -72,7 +73,7 @@ def parse_profiles(filename):
     current_block = []
     header_pattern = re.compile(r"Query profile of sequence\s+(.*)")
     
-    for line in lines:
+    for line in tqdm(lines, desc="Parsing profile lines"):
         if header_pattern.match(line):
             if current_block:
                 profiles.append(current_block)
@@ -82,7 +83,7 @@ def parse_profiles(filename):
         profiles.append(current_block)
     
     profile_data = []
-    for block in profiles:
+    for block in tqdm(profiles, desc="Processing profile blocks"):
         if len(block) < 3:
             continue
         header_line = block[0].strip()
@@ -134,7 +135,7 @@ def build_database_pssm(input_filename, output_db="profiledb", index_file="profi
     db_buffer_parts = []
     index_entries = []
     current_offset = 0
-    for key, profile_matrix in profile_blocks:
+    for key, profile_matrix in tqdm(profile_blocks, desc="Processing profiles"):
         logPSSM, consensus = computeLogPSSM(profile_matrix)
         buf = toBuffer_pssm(logPSSM, consensus)
         buf_length = len(buf)
@@ -159,7 +160,7 @@ def parse_substitution_matrix_seq(matrix_str):
     lines = matrix_str.strip().splitlines()
     header = None
     mat = {}
-    for line in lines:
+    for line in tqdm(lines, desc="Parsing substitution matrix"):
         line = line.strip()
         if not line or line.startswith("#"):
             continue
@@ -234,7 +235,7 @@ def build_database_seq(seq_db_file, seq_index_file, output_db="profile", output_
     parts = []
     index_lines = []
     current_offset = 0
-    for key, seq in seqs:
+    for key, seq in tqdm(seqs, desc="Processing sequences"):
         profile = generate_profile_for_sequence(seq, sub_matrix)
         packed = pack_profile_seq(profile)
         parts.append(packed)

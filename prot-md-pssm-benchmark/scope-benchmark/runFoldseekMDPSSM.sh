@@ -40,18 +40,16 @@ if [ "$RUN_FOLDSEEK" = true ]; then
     # ------------------------------------------------------------------------------------------------
     # First create the sequence database that will be used as target
     
-    echo "Creating sequence databases for 3Di"
-    ${MMSEQS} createdb ${SEQUENCE_FASTA_3Di} ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK}_ss
-    echo "Creating sequence databases for AA"
-    ${MMSEQS} createdb ${SEQUENCE_FASTA_AA} ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK}
+    # echo "Creating sequence databases for 3Di"
+    # ${MMSEQS} createdb ${SEQUENCE_FASTA_3Di} ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK}_ss
+    # echo "Creating sequence databases for AA"
+    # ${MMSEQS} createdb ${SEQUENCE_FASTA_AA} ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK}
 
-    # python generate_foldseek_db.py ${SEQUENCE_FASTA_AA} ${SEQUENCE_FASTA_3Di} ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK} ${OUT_DIR}
-    # ${FOLDSEEK} createindex ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK} ${ALIGN_DIR_TMP}/tmp --create-lookup 1 -v 3
-    # cp ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK}_h ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK}_ss_h
-    # cp ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK}_h.dbtype ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK}_ss_h.dbtype
-    # cp ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK}_h.index ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK}_ss_h.index
+    python generate_foldseek_db.py ${SEQUENCE_FASTA_AA} ${SEQUENCE_FASTA_3Di} ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK} ${OUT_DIR}
+    cp ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK}_h ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK}_ss_h
+    cp ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK}_h.dbtype ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK}_ss_h.dbtype
+    cp ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK}_h.index ${ALIGN_DIR_TMP}/${DB_NAME_FOLDSEEK}_ss_h.index
 
-    # Generate index file for foldseek database
 
     # ${FOLDSEEK} createdb ${ALIGN_DIR_TMP}/${MMSEQS_DB_NAME} ${ALIGN_DIR_TMP}/${FOLDSEEK_DB_NAME}
 

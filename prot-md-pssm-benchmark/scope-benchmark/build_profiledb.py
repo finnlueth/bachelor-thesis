@@ -273,7 +273,7 @@ def copy_and_create_extras(mmseqs_db, output_dir):
     shutil.copy2(src_h, dest_profile_h)
     shutil.copy2(src_h_index, dest_profile_h_index)
     shutil.copy2(src_h_dbtype, dest_profile_h_dbtype)
-    shutil.copy2(src_lookup, dest_lookup)
+    # shutil.copy2(src_lookup, dest_lookup)
     
     # Create the .dbtype files by writing 4 bytes: (2,0,0,0)
     data = bytes([2,0,0,0])

@@ -1,5 +1,5 @@
 import typing as T
-from .trajectory_tokenizer import TrajectoryTokenizer
+from .tokenize_trajectory import TrajectoryTokenizer
 
 
 class Bio2TokenTokenizer(TrajectoryTokenizer):

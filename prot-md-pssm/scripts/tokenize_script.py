@@ -82,9 +82,15 @@ def write_to_h5_file(
 
                     for temp_replica, tokens in tokenizer_results.items():
                         tokens_array = np.array(tokens, dtype="S")
+                        tokens_array = tokens
+                        # print(type(tokens_array))
+                        # print(type(tokens_array[0]))
+                        # print(tokens_array.dtype)
+                        # print(tokens_array.shape)
+                        # print(tokens_array)
                         if temp_replica in trajectory_group:
                             del trajectory_group[temp_replica]
-                        trajectory_group.create_dataset(temp_replica, data=tokens_array, dtype=np.float32)
+                        trajectory_group.create_dataset(temp_replica, data=tokens_array, dtype=h5py.string_dtype())
                 break
         except Exception as e:
             logging.error("Waiting for h5 file to become available...", e)

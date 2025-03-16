@@ -1,4 +1,4 @@
-from .trajectory_tokenizer import TrajectoryTokenizer
+from .tokenize_trajectory import TrajectoryTokenizer
 import tempfile
 import os
 import typing as T

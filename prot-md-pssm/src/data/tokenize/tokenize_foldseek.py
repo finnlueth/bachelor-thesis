@@ -8,7 +8,7 @@ from Bio import SeqRecord, Seq
 
 import logging
 import typing as T
-from .trajectory_tokenizer import TrajectoryTokenizer
+from .tokenize_trajectory import TrajectoryTokenizer
 
 
 def get_3di_sequences_from_memory(pdb_files: T.List[str], foldseek_path="foldseek"):

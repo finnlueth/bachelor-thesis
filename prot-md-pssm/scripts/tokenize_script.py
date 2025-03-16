@@ -5,6 +5,8 @@ python3 scripts/tokenize_script.py --input_path ./tmp/data/mdCATH/data/ --output
 python scripts/tokenize_script.py --input_path ./tmp/data/mdCATH/data/ --output_path ./tmp/output/tokenized/mdcath --tokenizers foldseek --dataset mdcath
 
 python scripts/tokenize_script.py --input_path /home/finnlueth/mnt/smb/data/datasets/mdCATH/data --output_path ./tmp/output/tokenized/mdcath --tokenizers foldseek --dataset mdcath
+
+python scripts/tokenize_script.py --input_path /mnt/gondolin/data/datasets/mdCATH/data/ --output_path ./tmp/data/processed/ --tokenizers foldseek --dataset mdcath
 """
 
 import argparse

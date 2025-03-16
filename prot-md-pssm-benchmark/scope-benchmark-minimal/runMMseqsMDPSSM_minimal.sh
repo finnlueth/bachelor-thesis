@@ -4,17 +4,15 @@ FOLDSEEK="foldseek"
 MMSEQS="mmseqs"
 
 BENCHMARK="bench.noselfhit"
-
 FOLDSEEK_ANALYSIS_SCOP_DIR=./scopbenchmark
 
 DATASET_TYPE=""
-SEQUENCE_FASTA_AA=./data/scope40_sequences_${DATASET_TYPE}.fasta
-SEQUENCE_FASTA_3Di=./data/scope40_sequences_3Di_${DATASET_TYPE}.fasta
-PSSM_CSV=./data/scope40_prot-md-pssm-2025-03-05-17-43-47-full-dataset_concatenated_${DATASET_TYPE}.tsv
+SEQUENCE_FASTA_AA=./data/scope40_sequences${DATASET_TYPE}.fasta
+SEQUENCE_FASTA_3Di=./data/scope40_sequences_3Di${DATASET_TYPE}.fasta
+PSSM_CSV=./data/scope40_prot-md-pssm-2025-03-05-17-43-47-full-dataset_concatenated${DATASET_TYPE}.tsv
 LOOKUP_FILE=./data/scop_lookup.fix.tsv
 
-
-OUT_DIR=./out/foldseek_mdpssm_benchmark
+OUT_DIR=./out/mmseqs_mdpssm_benchmark
 ALIGN_DIR_RAW=${OUT_DIR}/alignResults/rawoutput
 DB_SEQUENCE=${OUT_DIR}/alignResults/db_sequence
 DB_PROFILE=${OUT_DIR}/alignResults/db_profile
@@ -42,7 +40,7 @@ date
 echo "Running Foldseek or MMseqs"
 
 # Create the 3Di and AA databases
-python generate_foldseek_db.py ${SEQUENCE_FASTA_AA} ${SEQUENCE_FASTA_3Di} ${DB_SEQUENCE}/${DB_NAME_FOLDSEEK} ${OUT_DIR}
+python generate_mmseqs_db.py ${SEQUENCE_FASTA_AA} ${SEQUENCE_FASTA_3Di} ${DB_SEQUENCE}/${DB_NAME_MMSEQS} ${OUT_DIR}
 
 # Build the profile database from PSSMs, this creates targetDB_profile and targetDB_profile
 # From Victor: Here's a script to write a foldseek profiledb from tsv 3DI profiles and an amino acid sequence database. You can then use this resulting database as a query for any foldseek search.
@@ -50,21 +48,21 @@ python generate_foldseek_db.py ${SEQUENCE_FASTA_AA} ${SEQUENCE_FASTA_3Di} ${DB_S
 # Question: Line 276 in build_profiledb.py: `shutil.copy2(src_lookup, dest_lookup)` requires lookup file to exist, which is not created in the generate_foldseek_db.py script.
 # Do I need the lookup file? How do I get it? 
 # When commenting out the line, the script runs fine until convertalis.
-python build_profiledb.py ${PSSM_CSV} ${DB_SEQUENCE}/${DB_NAME_FOLDSEEK} ${DB_PROFILE}
+python build_profiledb.py ${PSSM_CSV} ${DB_SEQUENCE}/${DB_NAME_MMSEQS} ${DB_PROFILE}
 
 # Run the search using the profile database as query against the sequence database as target
 # Profile vs Sequence
-${FOLDSEEK} search ${DB_SEQUENCE}/${DB_NAME_FOLDSEEK} ${DB_SEQUENCE}/${DB_NAME_FOLDSEEK} ${ALIGN_DIR_ALN} ${ALIGN_DIR_TMP} --threads 8 -s 9.5 --max-seqs 2000 -e 10
+${MMSEQS} search ${DB_SEQUENCE}/${DB_NAME_MMSEQS} ${DB_PROFILE}/${DB_NAME_MMSEQS}_profile ${ALIGN_DIR_ALN} ${ALIGN_DIR_TMP} --threads 8 -s 9.5 --max-seqs 2000 -e 10000
 
 # Convert the alignment
-${FOLDSEEK} convertalis ${DB_SEQUENCE}/${DB_NAME_FOLDSEEK} ${DB_SEQUENCE}/${DB_NAME_FOLDSEEK} ${ALIGN_DIR_ALN} ${ALIGN_DIR_RAW}/foldseekaln
+${MMSEQS} convertalis ${DB_SEQUENCE}/${DB_NAME_MMSEQS} ${DB_PROFILE}/${DB_NAME_MMSEQS}_profile ${ALIGN_DIR_ALN} ${ALIGN_DIR_RAW}/mmseqsaln
 
 
 # end timing
 date
 
 # generate ROCX file
-${FOLDSEEK_ANALYSIS_SCOP_DIR}/scripts/${BENCHMARK}.awk ${LOOKUP_FILE} <(cat ${ALIGN_DIR_RAW}/foldseekaln) > ${ALIGN_DIR_ROCX}/foldseek.rocx
+${FOLDSEEK_ANALYSIS_SCOP_DIR}/scripts/${BENCHMARK}.awk ${LOOKUP_FILE} <(cat ${ALIGN_DIR_RAW}/mmseqsaln) > ${ALIGN_DIR_ROCX}/mmseqs.rocx
 
 # calculate auc
-awk '{ famsum+=$3; supfamsum+=$4; foldsum+=$5}END{print famsum/NR,supfamsum/NR,foldsum/NR}' ${ALIGN_DIR_ROCX}/foldseek.rocx
+awk '{ famsum+=$3; supfamsum+=$4; foldsum+=$5}END{print famsum/NR,supfamsum/NR,foldsum/NR}' ${ALIGN_DIR_ROCX}/mmseqs.rocx

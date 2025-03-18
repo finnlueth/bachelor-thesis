@@ -17,7 +17,7 @@ def plot_scope_benchmarks(file_paths: dict[str, str]):
     titles = ["Family", "Superfamily", "Fold"]
     y_labels = ["FAM", "SFAM", "FOLD"]
 
-    colors = ['black', 'blue', 'red', 'orange', 'green', 'purple']
+    colors = ['black', 'blue', 'red', 'orange', 'green', 'purple', 'brown', 'gray', 'olive', 'cyan', 'magenta', 'lime', 'teal', 'navy', 'maroon', 'gold', 'silver', 'indigo', 'turquoise', 'coral', 'khaki', 'lime', 'teal', 'navy', 'maroon', 'gold', 'silver', 'indigo', 'turquoise', 'coral', 'khaki']
 
     for idx, (name, path) in enumerate(file_paths.items()):
         df = pd.read_csv(path, sep="\t")

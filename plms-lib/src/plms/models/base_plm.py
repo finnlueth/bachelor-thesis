@@ -24,28 +24,19 @@ class ProteinLanguageModel(PreTrainedModel, ABC):
         """
         if name_or_path is not None and config is not None:
             raise ValueError("Provide either a name_or_path or a config, not both.")
-        
-        if name_or_path is None:
-            config = self.get_default_config(name_or_path=name_or_path)
-        
+
+        if config is None:
+            config: PLMConfig = self.get_default_config(name_or_path=name_or_path)
+
         super().__init__(config, *args, **kwargs)
         self.model: PreTrainedModel = self._load_model()
 
     @abstractmethod
-    def get_default_config(self, name_or_path: str) -> PretrainedConfig:
+    def get_default_config(name_or_path: str) -> PretrainedConfig:
         """Load the underlying transformer model config.
 
         Returns:
             The model config
-        """
-        pass
-
-    @abstractmethod
-    def get_tokenizer(self) -> PreTrainedTokenizer:
-        """Load the underlying tokenizer.
-
-        Returns:
-            The loaded tokenizer
         """
         pass
 
@@ -65,11 +56,12 @@ class ProteinLanguageModel(PreTrainedModel, ABC):
         """
         pass
 
-    @abstractmethod
     def forward(
         self,
         input_ids: Union[torch.Tensor, List[List[int]]],
         attention_mask: Optional[Union[torch.Tensor, List[List[int]]]] = None,
+        *args,
+        **kwargs,
     ) -> Union[torch.Tensor, BaseModelOutput]:
         """Forward pass of the model.
 
@@ -78,9 +70,16 @@ class ProteinLanguageModel(PreTrainedModel, ABC):
             attention_mask: Tensor of attention masks
 
         Returns:
-            Tensor of last model hidden states (embeddings)
+            Dictionary of model outputs
         """
-        pass
+        if attention_mask is None:
+            attention_mask = torch.ones_like(input_ids)
+        outputs = self.model.forward(input_ids, attention_mask, *args, **kwargs)
+
+        if self.mean_pooling:
+            outputs['last_hidden_state'] = self.mean_pooling(outputs['last_hidden_state'], attention_mask)
+
+        return outputs
 
     def _get_embeddings(self, input_ids: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
         """Get the embeddings from the model."""

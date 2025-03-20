@@ -1,11 +1,12 @@
 from typing import List, Optional, Union
 
 import torch
-from transformers import PretrainedConfig, PreTrainedModel, PreTrainedTokenizer, T5EncoderModel, T5Tokenizer
+from transformers import T5EncoderModel
 
-from ..base_plm import ProteinLanguageModel
 from ...configurations import PLMConfig
-
+from ..base_plm import ProteinLanguageModel
+from ...utils import modeling_utils
+from ...modeling_outputs import ProteinLanguageModelOutput
 
 class ProtT5(ProteinLanguageModel):
     """Wrapper for ProtT5 models."""
@@ -13,7 +14,7 @@ class ProtT5(ProteinLanguageModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def get_default_config(self, name_or_path: str) -> PretrainedConfig:
+    def get_default_config(self, name_or_path: str) -> PLMConfig:
         return PLMConfig(name_or_path=name_or_path)
 
     def _load_model(self) -> T5EncoderModel:
@@ -25,7 +26,7 @@ class ProtT5(ProteinLanguageModel):
         )
         return model
 
-    def update_attention_mask(attention_mask: torch.Tensor) -> torch.Tensor:
+    def update_attention_mask(self, attention_mask: torch.Tensor) -> torch.Tensor:
         seq_lengths = attention_mask.sum(dim=1) - 1
         batch_indices = torch.arange(attention_mask.size(0), device=attention_mask.device)
         attention_mask[batch_indices, seq_lengths] = 0
@@ -34,22 +35,24 @@ class ProtT5(ProteinLanguageModel):
     def forward(
         self,
         input_ids: Union[torch.Tensor, List[List[int]]],
-        attention_mask: Optional[Union[torch.Tensor, List[List[int]]]] = None,
+        attention_mask: Optional[Union[torch.Tensor, List[List[int]]]],
+        *args,
+        **kwargs,
     ) -> torch.Tensor:
-        hidden_states = self.model(
+        model_outputs = self.model(
             input_ids=input_ids,
             attention_mask=attention_mask,
-        )["last_hidden_state"]
+        )
 
         attention_mask = self.update_attention_mask(attention_mask)
 
-        hidden_states = self.trim_hidden_states(
-            hidden_states,
+        model_outputs["last_hidden_state"] = modeling_utils.trim_hidden_states(
+            model_outputs["last_hidden_state"],
             attention_mask,
-            self.trim_value,
+            self.config.trim_value,
         )
 
-        if self.mean_pooling:
-            hidden_states = self.mean_pooling(hidden_states, attention_mask)
+        if self.config.mean_pooling:
+            model_outputs["last_hidden_state"] = modeling_utils.mean_pool(model_outputs["last_hidden_state"], attention_mask)
 
-        return hidden_states
+        return ProteinLanguageModelOutput(**model_outputs, masks=attention_mask)

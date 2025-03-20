@@ -1,9 +1,6 @@
-import torch
-from transformers import PreTrainedModel
-
-from ...configurations.configuration_base_plm import PLMConfig
-from ..T5.prostT5 import ProstT5
-from ..T5.protT5 import ProtT5
+from ..base_plm import ProteinLanguageModel
+from ..T5.modeling_prostT5 import ProstT5
+from ..T5.modeling_protT5 import ProtT5
 
 MODEL_TYPES = {
     # "ElnaggarLab/ankh-base",
@@ -20,9 +17,7 @@ MODEL_TYPES = {
 }
 
 
-def auto_model(model_name: str, *args, **kwargs) -> PreTrainedModel:
+def auto_model(model_name: str, *args, **kwargs) -> ProteinLanguageModel:
     if model_name not in MODEL_TYPES:
         raise ValueError(f"Model {model_name} not found in MODEL_TYPES")
-
-    config = MODEL_TYPES[model_name].get_default_config()
-    return MODEL_TYPES[model_name](config=config, *args, **kwargs)
+    return MODEL_TYPES[model_name](name_or_path=model_name, *args, **kwargs)

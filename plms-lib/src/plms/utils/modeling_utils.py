@@ -1,23 +1,39 @@
+from typing import List, Optional, Union
+
 import torch
-from typing import Union, List, Optional
 
 
-def mean_pool(hidden_states: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
+def mean_pool(hidden_states: torch.Tensor, attention_mask: Optional[torch.Tensor] = None) -> torch.Tensor:
     """
-    Performs mean pooling over tokens where attention mask is 1.
-
+    Performs mean pooling only over tokens where attention mask is 1.
     Args:
         hidden_states: tensor of shape (batch_size, seq_length, hidden_dim)
         attention_mask: tensor of shape (batch_size, seq_length)
     Returns:
         Mean pooled representation of shape (batch_size, hidden_dim)
     """
+    if hidden_states.dim() != 3:
+        raise ValueError(f"Expected hidden_states to have 3 dimensions (batch_size, seq_length, hidden_dim), got {hidden_states.dim()}")
+
+    if attention_mask is None:
+        return torch.mean(hidden_states, dim=1)
+
+    if attention_mask.dim() != 2:
+        raise ValueError(f"Expected attention_mask to have 2 dimensions (batch_size, seq_length), got {attention_mask.dim()}")
+
+    if hidden_states.size(0) != attention_mask.size(0) or hidden_states.size(1) != attention_mask.size(1):
+        raise ValueError(
+            f"Shape mismatch: hidden_states {hidden_states.shape} and attention_mask {attention_mask.shape} "
+            "must have matching batch_size and seq_length dimensions"
+        )
+
     mask_expanded = attention_mask.unsqueeze(-1).expand(hidden_states.size())
     masked_embeddings = hidden_states * mask_expanded
+
     sum_embeddings = torch.sum(masked_embeddings, dim=1)
     sum_mask = torch.sum(attention_mask, dim=1).unsqueeze(-1)
-    mean_pooled = sum_embeddings / sum_mask
 
+    mean_pooled = sum_embeddings / sum_mask
     return mean_pooled
 
 
@@ -37,16 +53,13 @@ def trim_attention_mask(
     if trim_beginning == 0 and trim_end == 0:
         return attention_mask
 
-    # Is this really needed?
-    # attention_mask = attention_mask.clone() 
-    cumsum_forward = torch.cumsum(attention_mask, dim=1)
-    cumsum_backward = torch.cumsum(attention_mask.flip(dims=[1]), dim=1).flip(dims=[1])
-
     if trim_beginning > 0:
+        cumsum_forward = torch.cumsum(attention_mask, dim=1)
         beginning_mask = cumsum_forward > trim_beginning
         attention_mask = attention_mask * beginning_mask
 
     if trim_end > 0:
+        cumsum_backward = torch.cumsum(attention_mask.flip(dims=[1]), dim=1).flip(dims=[1])
         end_mask = cumsum_backward > trim_end
         attention_mask = attention_mask * end_mask
 
@@ -55,7 +68,7 @@ def trim_attention_mask(
 
 def rotate_padding_side(hidden_states: torch.Tensor, attention_mask: Union[torch.Tensor, List[List[int]]]) -> torch.Tensor:
     """
-    Rotates padding side of embeddings.
+    Rotates padding side of embeddings. This is necessary for models that use padding to the left.
     Args:
         hidden_states: tensor of shape (batch_size, seq_length, hidden_dim)
         attention_mask: tensor of shape (batch_size, seq_length)
@@ -75,30 +88,9 @@ def rotate_padding_side(hidden_states: torch.Tensor, attention_mask: Union[torch
     return adjusted_hidden_states, adjusted_attention_mask
 
 
-def mean_pooling(hidden_states: torch.Tensor, attention_mask: Optional[torch.Tensor] = None) -> torch.Tensor:
-    """
-    Performs mean pooling only over tokens where attention mask is 1.
-    Args:
-        hidden_states: tensor of shape (batch_size, seq_length, hidden_dim)
-        attention_mask: tensor of shape (batch_size, seq_length)
-    Returns:
-        Mean pooled representation of shape (batch_size, hidden_dim)
-    """
-    if attention_mask is None:
-        return torch.mean(hidden_states, dim=1)
-
-    mask_expanded = attention_mask.unsqueeze(-1).expand(hidden_states.size())
-    masked_embeddings = hidden_states * mask_expanded
-    sum_embeddings = torch.sum(masked_embeddings, dim=1)
-    sum_mask = torch.sum(attention_mask, dim=1).unsqueeze(-1)
-    mean_pooled = sum_embeddings / sum_mask
-
-    return mean_pooled
-
-
 def trim_hidden_states(hidden_states: torch.Tensor, attention_mask: torch.Tensor, trim_value: int = 0) -> torch.Tensor:
     """Remove special tokens from embeddings.
-    
+
     Args:
         hidden_states: tensor of shape (batch_size, seq_length, hidden_dim)
         attention_mask: tensor of shape (batch_size, seq_length)

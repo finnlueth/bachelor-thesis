@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Union
 
 import torch
-from transformers import PretrainedConfig, PreTrainedModel, PreTrainedTokenizer
+from transformers import PretrainedConfig, PreTrainedModel, PreTrainedTokenizer, modeling_utils
 from transformers.modeling_outputs import BaseModelOutput
 
 from ..configurations.configuration_base_plm import PLMConfig
@@ -30,6 +30,10 @@ class ProteinLanguageModel(PreTrainedModel, ABC):
 
         super().__init__(config, *args, **kwargs)
         self.model: PreTrainedModel = self._load_model()
+
+        for name, init_func in modeling_utils.TORCH_INIT_FUNCTIONS.items():
+            setattr(torch.nn.init, name, init_func)
+        self.post_init()
 
     @abstractmethod
     def get_default_config(name_or_path: str) -> PretrainedConfig:
@@ -77,7 +81,7 @@ class ProteinLanguageModel(PreTrainedModel, ABC):
         outputs = self.model.forward(input_ids, attention_mask, *args, **kwargs)
 
         if self.mean_pooling:
-            outputs['last_hidden_state'] = self.mean_pooling(outputs['last_hidden_state'], attention_mask)
+            outputs["last_hidden_state"] = self.mean_pooling(outputs["last_hidden_state"], attention_mask)
 
         return outputs
 

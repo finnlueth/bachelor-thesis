@@ -45,8 +45,9 @@ class ProstT5(ProteinLanguageModel):
             input_ids=input_ids,
             attention_mask=attention_mask,
         )
-        
-        attention_mask = self.update_attention_mask(attention_mask)
+
+        attention_mask = self.update_attention_mask(attention_mask)[:, 1:]
+        model_outputs["last_hidden_state"] = model_outputs["last_hidden_state"][:, 1:, :]
 
         model_outputs["last_hidden_state"] = modeling_utils.trim_hidden_states(
             model_outputs["last_hidden_state"],

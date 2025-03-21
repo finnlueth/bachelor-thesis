@@ -28,7 +28,6 @@ class ProteinSampleSubsetTrainer(Trainer):
         super().__init__(*args, **kwargs)
 
     # based on https://github.com/huggingface/transformers/blob/v4.47.1/src/transformers/trainer.py#L1056
-    # TODO: Subset evaluation dataset during training
     def get_eval_dataloader(self, eval_dataset=None):
         """
         Samples the evaluation dataset and returns a subset of size self.eval_sample_size.

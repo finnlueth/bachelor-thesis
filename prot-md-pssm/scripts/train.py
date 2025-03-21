@@ -21,7 +21,7 @@ from src.utils.sanity_checks import sanity_checks
 
 def main():
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
     train_config = load_config()
     model_name_identifier, device, report_to, run, USE_WANDB, SEED = setup_environment(train_config)

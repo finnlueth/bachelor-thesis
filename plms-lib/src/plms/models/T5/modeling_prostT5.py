@@ -46,6 +46,8 @@ class ProstT5(ProteinLanguageModel):
             attention_mask=attention_mask,
         )
 
+        attention_mask = attention_mask.clone()
+
         attention_mask = self.update_attention_mask(attention_mask)[:, 1:]
         model_outputs["last_hidden_state"] = model_outputs["last_hidden_state"][:, 1:, :]
 
@@ -58,4 +60,4 @@ class ProstT5(ProteinLanguageModel):
         if self.config.mean_pooling:
             model_outputs["last_hidden_state"] = modeling_utils.mean_pool(model_outputs["last_hidden_state"], attention_mask)
 
-        return ProteinLanguageModelOutput(**model_outputs, masks=attention_mask)
+        return ProteinLanguageModelOutput(**model_outputs, mask=attention_mask)

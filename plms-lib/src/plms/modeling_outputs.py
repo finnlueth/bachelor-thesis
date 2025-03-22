@@ -12,4 +12,4 @@ class ProteinLanguageModelOutput(ModelOutput):
     hidden_states: Optional[Tuple[torch.FloatTensor, ...]] = None
     last_hidden_state: Optional[torch.FloatTensor] = None
     attentions: Optional[Tuple[torch.FloatTensor, ...]] = None
-    masks: Optional[Tuple[torch.FloatTensor, ...]] = None
+    mask: Optional[Tuple[torch.FloatTensor, ...]] = None

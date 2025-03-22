@@ -8,7 +8,7 @@ from ..base_tokenizer import ProteinLanguageModelTokenizer
 
 
 class ProstT5Tokenizer(ProteinLanguageModelTokenizer):
-    def __init__(self, name_or_path, tokenizer_class=T5Tokenizer, *args, **kwargs):
+    def __init__(self, name_or_path="Rostlab/ProstT5", tokenizer_class=T5Tokenizer, *args, **kwargs):
         super().__init__(
             tokenizer_class=tokenizer_class,
             pretrained_model_name_or_path=name_or_path,
@@ -56,6 +56,13 @@ class ProstT5Tokenizer(ProteinLanguageModelTokenizer):
         *args,
         **kwargs,
     ) -> Union[str, List[str]]:
+        
+        if isinstance(tokens, torch.Tensor) and tokens.shape[0] == 1:
+            tokens = tokens.squeeze(0)
+
+        if isinstance(tokens, list) and all(isinstance(x, int) for x in tokens):
+            tokens = [tokens]
+
         return [
             seq.replace(" ", "").replace("<AA2fold>", "").replace("<fold2AA>", "")
             if skip_special_tokens

@@ -7,7 +7,7 @@ weights_and_biases:
   project: prot-md-pssm
   report_to: wandb
 dataset:
-  path: "../tmp/data/pssm/pssm_dataset_0_only/"
+  path: "../tmp/data/pssm/pssm_dataset_320_0_prostt5"
 model:
   name: ProtMDPSSM
   protein_encoder_name: Rostlab/prot_t5_xl_uniref50

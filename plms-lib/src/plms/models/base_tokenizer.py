@@ -27,6 +27,9 @@ class ProteinLanguageModelTokenizer:
     def decode(self, tokens: Union[torch.Tensor, List[int]], *args, **kwargs) -> Union[str, List[str]]:
         """Decode a list of tokens into a string."""
         pass
+    
+    def get_tokenizer(self):
+        return self.tokenizer
 
     def tokenize_fasta(
         self,

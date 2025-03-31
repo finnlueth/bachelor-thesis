@@ -1,0 +1,27 @@
+[project]
+name = "bio2token-tokenizer-benchmark"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+authors = [
+    { name = "" }
+]
+requires-python = "==3.11.9"
+dependencies = [
+    "torch==2.1.0",
+    "mamba-ssm==1.2.1",
+    "biopython>=1.85",
+    "ipykernel>=6.29.5",
+    "ipywidgets>=8.1.5",
+    "numpy==1.26.4",
+    "nvitop>=1.4.2",
+    "ruff>=0.11.2",
+    "seaborn>=0.13.2",
+    "wandb>=0.19.8",
+    "setuptools>=78.1.0",
+]
+
+[tool.uv]
+no-build-isolation-package = ['mamba-ssm',]
+
+

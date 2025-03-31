@@ -1,4 +1,5 @@
 data
 tokenizers/alphafold_tokenizer
-tokenizers/bio2token_tokenizer
-tokenizers/foldtoken_tokenizer
+tokenizers/esm3_tokenizer
+tokenizers/bio2token_tokenizer/bio2token_main
+tokenizers/foldtoken_tokenizer/FoldToken_open_master

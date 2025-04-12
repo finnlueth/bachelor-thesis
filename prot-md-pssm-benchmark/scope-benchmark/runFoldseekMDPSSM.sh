@@ -13,7 +13,7 @@ SEQUENCE_FASTA_3Di=./data/scope40_sequences_3Di_short.fasta
 PSSM_CSV=./data/scope40_prot-md-pssm-2025-03-05-17-43-47-full-dataset_concatenated_short.tsv
 LOOKUP_FILE=${FOLDSEEK_ANALYSIS_SCOP_DIR}/data/scop_lookup.fix.tsv
 
-OUT_DIR=./out/foldseek_mdpssm_benchmark
+OUT_DIR=./out/foldseek_prott5_mdpssm_benchmark
 ALIGN_DIR_RAW=${OUT_DIR}/alignResults/rawoutput
 ALIGN_DIR_TMP=${OUT_DIR}/alignResults/tmp
 ALIGN_DIR_ROCX=${OUT_DIR}/alignResults/rocx

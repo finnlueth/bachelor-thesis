@@ -2,6 +2,7 @@ out
 /data/scope40_prot-md-pssm-2025-03-05-17-43-47-full-dataset_concatenated.tsv
 /data/scope40_sequences_3Di.fasta
 /data/scope40_sequences.fasta
+/data/scope40_prot-md-pssm-2025-04-02-15-20-18-dataset_320_0_prostt5.tsv
 data/scop_lookup.fix.tsv
 data/scope40_sequences_3Di_argmax.fasta
 data/scope40_sequences_aa.fasta

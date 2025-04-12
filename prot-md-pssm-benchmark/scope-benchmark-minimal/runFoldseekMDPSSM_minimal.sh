@@ -6,13 +6,13 @@ MMSEQS="mmseqs"
 BENCHMARK="bench.noselfhit"
 FOLDSEEK_ANALYSIS_SCOP_DIR=./scopbenchmark
 
-DATASET_TYPE=""
+# DATASET_TYPE="_prostt5"
 SEQUENCE_FASTA_AA=./data/scope40_sequences_aa${DATASET_TYPE}.fasta
 SEQUENCE_FASTA_3Di=./data/scope40_sequences_3Di_argmax${DATASET_TYPE}.fasta
-PSSM_CSV=./data/scope40_prot-md-pssm-2025-03-05-17-43-47-full-dataset_concatenated${DATASET_TYPE}.tsv
+PSSM_CSV=./data/scope40_prot-md-pssm-2025-04-02-15-20-18-dataset_320_0_concatenated_prostt5.tsv
 LOOKUP_FILE=./data/scop_lookup.fix.tsv
 
-OUT_DIR=./out/foldseek_mdpssm_benchmark
+OUT_DIR=./out/foldseek_mdpssm_prott5_benchmark
 ALIGN_DIR_RAW=${OUT_DIR}/alignResults/rawoutput
 DB_SEQUENCE=${OUT_DIR}/alignResults/db_sequence
 DB_PROFILE=${OUT_DIR}/alignResults/db_profile

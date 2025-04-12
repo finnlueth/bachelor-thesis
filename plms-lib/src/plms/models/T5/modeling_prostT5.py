@@ -32,7 +32,7 @@ class ProstT5(ProteinLanguageModel):
         batch_indices = torch.arange(attention_mask.size(0), device=attention_mask.device)
         attention_mask[batch_indices, seq_lengths] = 0
         attention_mask[:, 0] = 0
-        return attention_mask
+        return attention_mask[:, 1:]
 
     def forward(
         self,
@@ -48,14 +48,30 @@ class ProstT5(ProteinLanguageModel):
 
         attention_mask = attention_mask.clone()
 
-        attention_mask = self.update_attention_mask(attention_mask)[:, 1:]
+        # for ids, mask in zip(input_ids, attention_mask):
+        #     print(*[f"{x:<4d}" for x in ids], sep="")
+        #     print(*[f"{x:<4d}" for x in mask], sep="")
+        # print()
+        
+        attention_mask = self.update_attention_mask(attention_mask)
+        input_ids = input_ids[:, 1:]
         model_outputs["last_hidden_state"] = model_outputs["last_hidden_state"][:, 1:, :]
+        
 
         model_outputs["last_hidden_state"] = modeling_utils.trim_hidden_states(
             model_outputs["last_hidden_state"],
             attention_mask,
             self.config.trim_value,
         )
+        
+        # print(model_outputs["last_hidden_state"].mean(dim=2).shape)
+        
+        # for _ids, _mask, _hidden_state_mean in zip(input_ids, attention_mask, model_outputs["last_hidden_state"].abs().sum(dim=2).tolist()):
+        #     print(*[f"{x:<6d}" for x in _ids], sep="")
+        #     print(*[f"{x:<6d}" for x in _mask], sep="")
+        #     print(_mask.sum())
+        #     print(*[f"{x:<6.1f}" for x in _hidden_state_mean], sep="")
+        # print()
 
         if self.config.mean_pooling:
             model_outputs["last_hidden_state"] = modeling_utils.mean_pool(model_outputs["last_hidden_state"], attention_mask)

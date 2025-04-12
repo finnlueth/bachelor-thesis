@@ -62,8 +62,7 @@ def setup_environment(train_config):
     # torch.set_printoptions(profile="full")
     # torch.set_printoptions(profile="default")
 
-    VERBOSE = train_config["verbose"]
-    SEED = train_config["seed"]
+
 
     project_name = train_config["project_name"]
     custom_run_name = train_config["custom_run_name"].replace(" ", "-")

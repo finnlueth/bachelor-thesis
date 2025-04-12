@@ -1,7 +1,7 @@
 """
 python3 scripts/pssm_script.py --input_path /home/finnlueth/mnt/smb/data/datasets/mdCATH/data --output_path ./tmp/output/pssm/mdcath --dataset mdcath
 
- ['A C D E F G H I K L M N P Q R S T V W Y']
+['A C D E F G H I K L M N P Q R S T V W Y']
 """
 
 import argparse

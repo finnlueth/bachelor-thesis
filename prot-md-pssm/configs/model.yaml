@@ -1,5 +1,5 @@
 project_name: prot-md-pssm
-custom_run_name: "full dataset"
+custom_run_name: "dataset_320_0_prostt5"
 seed: 69 # 42
 verbose: false
 weights_and_biases:
@@ -10,8 +10,8 @@ dataset:
   path: "../tmp/data/pssm/pssm_dataset_320_0_prostt5"
 model:
   name: ProtMDPSSM
-  protein_encoder_name: Rostlab/prot_t5_xl_uniref50
-  # protein_encoder_name: Rostlab/ProstT5
+#   protein_encoder_name: Rostlab/prot_t5_xl_uniref50
+#   protein_encoder_name: Rostlab/ProstT5
   reload_from_checkpoint_path: ""
 lora:
   enabled: true
@@ -23,8 +23,8 @@ lora:
 trainer:
   learning_rate: 0.0001 # 1e-4 == 0.0001, 0.001
   train_batch_size: 10 # for full lora: 10; for no lora: 300, 192, or 128
-  num_epochs: 2 # 24
-  eval_batch_size: 32 #32
+  num_epochs: 1 # 24
+  eval_batch_size: 10 #32
   eval_strategy: steps
   eval_steps: 32
   eval_on_start: true

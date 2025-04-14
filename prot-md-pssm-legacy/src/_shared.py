@@ -98,11 +98,11 @@ def apply_lora_to_model(model, train_config):
         r=train_config["lora"]["r"],
         lora_alpha=train_config["lora"]["lora_alpha"],
         lora_dropout=train_config["lora"]["lora_dropout"],
+        use_rslora=train_config["lora"]["use_rslora"],
+        use_dora=train_config["lora"]["use_dora"],
         target_modules=target_modules,
         bias="none",
         modules_to_save=modules_to_save,
-        use_rslora=train_config["lora"]["use_rslora"],
-        use_dora=train_config["lora"]["use_dora"],
     )
 
     model = get_peft_model(model, lora_config)

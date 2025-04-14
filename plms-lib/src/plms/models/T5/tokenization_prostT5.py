@@ -34,7 +34,7 @@ class ProstT5Tokenizer(ProteinLanguageModelTokenizer):
             text = [
                 "<AA2fold> " + " ".join(list(re.sub(r"[UZOB]", "X", sequence)))
                 if sequence.isupper()
-                else "<fold2AA> " + " ".join(list(re.sub(r"[uzob]", "x", sequence)))
+                else "<fold2AA> " + " ".join(list(re.sub(r"[uzob]", "X", sequence)))
                 for sequence in text
             ]
         else:

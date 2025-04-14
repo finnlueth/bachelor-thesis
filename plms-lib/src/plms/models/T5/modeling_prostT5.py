@@ -1,7 +1,8 @@
 from typing import List, Optional, Union
 
 import torch
-from transformers import PretrainedConfig, T5EncoderModel
+from transformers import T5EncoderModel
+from torch.nn import functional as F
 
 from ...configurations import PLMConfig
 from ..base_plm import ProteinLanguageModel
@@ -15,7 +16,7 @@ class ProstT5(ProteinLanguageModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def get_default_config(self, name_or_path: str) -> PretrainedConfig:
+    def get_default_config(self, name_or_path: str) -> PLMConfig:
         return PLMConfig(name_or_path=name_or_path)
 
     def _load_model(self) -> T5EncoderModel:
@@ -48,32 +49,20 @@ class ProstT5(ProteinLanguageModel):
 
         attention_mask = attention_mask.clone()
 
-        # for ids, mask in zip(input_ids, attention_mask):
-        #     print(*[f"{x:<4d}" for x in ids], sep="")
-        #     print(*[f"{x:<4d}" for x in mask], sep="")
-        # print()
-        
         attention_mask = self.update_attention_mask(attention_mask)
-        input_ids = input_ids[:, 1:]
         model_outputs["last_hidden_state"] = model_outputs["last_hidden_state"][:, 1:, :]
-        
 
         model_outputs["last_hidden_state"] = modeling_utils.trim_hidden_states(
             model_outputs["last_hidden_state"],
             attention_mask,
             self.config.trim_value,
         )
-        
-        # print(model_outputs["last_hidden_state"].mean(dim=2).shape)
-        
-        # for _ids, _mask, _hidden_state_mean in zip(input_ids, attention_mask, model_outputs["last_hidden_state"].abs().sum(dim=2).tolist()):
-        #     print(*[f"{x:<6d}" for x in _ids], sep="")
-        #     print(*[f"{x:<6d}" for x in _mask], sep="")
-        #     print(_mask.sum())
-        #     print(*[f"{x:<6.1f}" for x in _hidden_state_mean], sep="")
-        # print()
 
-        if self.config.mean_pooling:
-            model_outputs["last_hidden_state"] = modeling_utils.mean_pool(model_outputs["last_hidden_state"], attention_mask)
+        # max_dim = attention_mask.sum(dim=1).max()
+        # attention_mask = attention_mask[:, :max_dim]
+        # model_outputs["last_hidden_state"] = model_outputs["last_hidden_state"][:, :max_dim, :]
+        # Add an extra dimension of zeros at the end
+        attention_mask = F.pad(attention_mask, (0, 1), value=0)
+        model_outputs["last_hidden_state"] = F.pad(model_outputs["last_hidden_state"], (0, 0, 0, 1, 0, 0), value=0)
 
         return ProteinLanguageModelOutput(**model_outputs, mask=attention_mask)

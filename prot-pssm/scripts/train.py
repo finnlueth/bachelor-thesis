@@ -3,7 +3,7 @@
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
 import gc
 import json
@@ -24,16 +24,20 @@ from transformers import TrainingArguments
 
 from plm_pssms import DataCollatorForPSSM, PLMConfigForPSSM, PLMForPssmGeneration, ProteinSampleSubsetTrainer
 
-temperature_identifier = "all"
-replica_identifier = 0
+# identifiers_temperature = ["320", "348", "379", "413", "450"]
+# identifiers_replica = ["0", "1", "2", "3", "4"]
 
-dataset_identifier = replica_identifier
+
+temperature_identifier = 450
+replica_identifier = "all"
+
+dataset_identifier = temperature_identifier
 
 config_yaml = f"""
 metadata:
   name: "prot-md-pssm"
   identifier: 
-  run_name: temp-{temperature_identifier}_repl-{dataset_identifier}
+  run_name: temp-{temperature_identifier}_repl-{replica_identifier}
   save_dir: ../tmp/models/adapters
   CUDA_VISIBLE_DEVICES: {os.environ["CUDA_VISIBLE_DEVICES"]}
 model:
@@ -51,7 +55,7 @@ training_args:
   logging_steps: 1
   logging_strategy: steps
   evaluation_strategy: steps
-  eval_steps: 1
+  eval_steps: 32
   eval_strategy: steps
   eval_on_start: true
   batch_eval_metrics: false
@@ -63,7 +67,7 @@ training_args:
   seed: 42
   lr_scheduler_type: cosine
   warmup_steps: 0
-  eval_sample_size: 10
+  eval_sample_size: 30
 lora:
   inference_mode: false
   r: 8
@@ -115,8 +119,8 @@ if config["model"]["encoder_name_or_path"] == "Rostlab/ProstT5":
     ds = ds.rename_column("attention_mask_prostT5", "attention_mask")
 if config["model"]["encoder_name_or_path"] == "Rostlab/prot_t5_xl_uniref50":
     ds = ds.remove_columns(["input_ids_prostT5", "attention_mask_prostT5"])
-    ds = ds.rename_column("input_ids_prostT5", "input_ids")
-    ds = ds.rename_column("attention_mask_prostT5", "attention_mask")
+    ds = ds.rename_column("input_ids_protT5", "input_ids")
+    ds = ds.rename_column("attention_mask_protT5", "attention_mask")
 
 ds = ds.remove_columns(["name", "sequence", "replica", "temperature"])
 # ds = ds.select(range(25))  # !!! TODO REMOVE THIS !!!
@@ -240,7 +244,7 @@ def pssm_to_csv(name, pssm):
     return tsv_string
 
 
-batch_size = 50
+batch_size = 20
 pssm_tsv = ""
 sequence_items = list(scop_sequences.items())
 sequence_batches = [dict(sequence_items[i : i + batch_size]) for i in range(0, len(sequence_items), batch_size)]

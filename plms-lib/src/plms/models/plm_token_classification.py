@@ -3,10 +3,7 @@ from typing import List, Optional, Tuple, Union
 import torch
 import torch.nn as nn
 from torch.nn import CrossEntropyLoss
-from transformers import (
-    PretrainedConfig,
-    PreTrainedModel,
-)
+from transformers import PretrainedConfig
 from transformers.modeling_outputs import TokenClassifierOutput
 
 from plms import (
@@ -49,7 +46,7 @@ class PLMForTokenClassification(ProteinLanguageModelPredictor):
         print(labels.shape)
         print(*[str(x)[:4].ljust(3) for x in labels[0].tolist()], sep=" ")
 
-        outputs = self.protein_encoder(
+        outputs = self.plm(
             input_ids,
             attention_mask=attention_mask,
             head_mask=head_mask,

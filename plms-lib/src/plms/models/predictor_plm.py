@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import List
 
 import torch
@@ -11,7 +11,7 @@ from plms.models import auto_model
 class ProteinLanguageModelPredictor(PreTrainedModel, ABC):
     """Abstract base class for protein language model predictors."""
 
-    def __init__(self, config: PretrainedConfig, *args, **kwargs):
+    def __init__(self, config: PretrainedConfig = None, *args, **kwargs):
         super().__init__(config, *args, **kwargs)
         self.protein_encoder = auto_model(config.encoder_name_or_path)
 
@@ -19,18 +19,10 @@ class ProteinLanguageModelPredictor(PreTrainedModel, ABC):
             setattr(torch.nn.init, name, init_func)
         self.post_init()
 
+    @abstractmethod
     def get_modules_to_save(self) -> List[str]:
         """Get the modules to save."""
-        modules = []
-        for name, _ in self.named_modules():
-            if (
-                "protein_encoder" not in name
-                and hasattr(self, name)
-                and hasattr(getattr(self, name.split(".")[0]), "weight")
-                and isinstance(getattr(self, name), torch.nn.Module)
-            ):
-                modules.append(name)
-        return modules
+        pass
 
     def post_init(self):
         """Post-initialization hook."""

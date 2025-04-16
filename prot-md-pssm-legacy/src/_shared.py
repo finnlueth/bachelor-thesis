@@ -80,6 +80,7 @@ def setup_environment(train_config):
     print("Using device:", device)
     print("Model identifier:", model_name_identifier)
 
+    SEED = 42
     return model_name_identifier, device, report_to, (run if USE_WANDB else None), USE_WANDB, SEED
 
 def load_model(train_config, device):

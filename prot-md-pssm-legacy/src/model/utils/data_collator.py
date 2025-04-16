@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 
 import torch
-from transformers.data.data_collator import DataCollatorForTokenClassification, pad_without_fast_tokenizer_warning
+from transformers.data.data_collator import pad_without_fast_tokenizer_warning
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 from transformers.utils import PaddingStrategy
 

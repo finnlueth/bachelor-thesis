@@ -2,7 +2,8 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Union
 
 import torch
-from transformers import PretrainedConfig, PreTrainedModel, PreTrainedTokenizer, modeling_utils
+from transformers import PretrainedConfig, PreTrainedModel
+from transformers.modeling_utils import TORCH_INIT_FUNCTIONS
 from transformers.modeling_outputs import BaseModelOutput
 
 from ..configurations.configuration_base_plm import PLMConfig
@@ -31,10 +32,6 @@ class ProteinLanguageModel(PreTrainedModel, ABC):
         super().__init__(config, *args, **kwargs)
         self.model: PreTrainedModel = self._load_model()
 
-        for name, init_func in modeling_utils.TORCH_INIT_FUNCTIONS.items():
-            setattr(torch.nn.init, name, init_func)
-        self.post_init()
-
     @abstractmethod
     def get_default_config(name_or_path: str) -> PretrainedConfig:
         """Load the underlying transformer model config.
@@ -55,8 +52,13 @@ class ProteinLanguageModel(PreTrainedModel, ABC):
 
     @abstractmethod
     def update_attention_mask(self, attention_mask: torch.Tensor) -> torch.Tensor:
-        """
-        Update the attention mask to ignore special tokens (pad, cls, sep, eos, etc.).
+        """Update the attention mask to ignore special tokens (pad, cls, sep, eos, etc.).
+
+        Args:
+            attention_mask: The attention mask to update
+
+        Returns:
+            The updated attention mask
         """
         pass
 

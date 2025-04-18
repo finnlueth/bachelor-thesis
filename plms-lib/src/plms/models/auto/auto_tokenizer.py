@@ -1,13 +1,5 @@
 from ..base_tokenizer import ProteinLanguageModelTokenizer
-from ..T5.tokenization_protT5 import ProtT5Tokenizer
-from ..T5.tokenization_prostT5 import ProstT5Tokenizer
-
-TOKENIZER_TYPES = {
-    "Rostlab/prot_t5_xl_half_uniref50-enc": ProtT5Tokenizer,
-    "Rostlab/prot_t5_xl_uniref50": ProtT5Tokenizer,
-    "Rostlab/ProstT5_fp16": ProtT5Tokenizer,
-    "Rostlab/ProstT5": ProstT5Tokenizer,
-}
+from ...utils.constants import TOKENIZER_TYPES
 
 
 def auto_tokenizer(model_name: str, *args, **kwargs) -> ProteinLanguageModelTokenizer:

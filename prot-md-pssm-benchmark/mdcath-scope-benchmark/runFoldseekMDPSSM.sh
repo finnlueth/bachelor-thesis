@@ -48,7 +48,7 @@ echo "Running Foldseek or MMseqs"
 # Question: Line 276 in build_profiledb.py: `shutil.copy2(src_lookup, dest_lookup)` requires lookup file to exist, which is not created in the generate_foldseek_db.py script.
 # Do I need the lookup file? How do I get it? 
 # When commenting out the line, the script runs fine until convertalis.
-# python ../scope-benchmark-minimal/build_profiledb_new.py ${PSSM_CSV} ${DB_SEQUENCE}/${DB_NAME_FOLDSEEK} ${DB_PROFILE}
+python ../scope-benchmark-minimal/build_profiledb_new.py ${PSSM_CSV} ${DB_SEQUENCE}/${DB_NAME_FOLDSEEK} ${DB_PROFILE}
 
 # Run the search using the profile database as query against the sequence database as target
 # Profile vs Sequence

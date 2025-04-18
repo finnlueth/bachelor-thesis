@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name ="plm-pssms"
+version = "0.0.1"
+dependencies = [
+    "numpy",
+    "torch",
+    "transformers",
+    "datasets",
+    ]
+
+[tool.ruff]
+extend-select = ["C4", "NPY", "PD", "SIM", "TCH"]
+ignore = ["E501", "F405"]
+show-fixes = true
+# target-version = "py310"
+
+# change the default line length number or characters.
+line-length = 128
+
+[tool.pylint]
+max-line-length = 128
+disable = []

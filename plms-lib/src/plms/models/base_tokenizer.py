@@ -12,20 +12,24 @@ class ProteinLanguageModelTokenizer:
         self.tokenizer = tokenizer_class.from_pretrained(*args, **kwargs)
 
     def __call__(self, *args, **kwargs):
+        """Call the tokenizer."""
         return self.tokenizer(*args, **kwargs)
 
-    def tokenize(self, text: Union[str, List[str]], *args, **kwargs) -> Union[List[str], List[List[int]]]:
+    def tokenize(self, text: Union[str, List[str]], *args, **kwargs) -> Union[List[int], List[List[int]]]:
         """Tokenize a text."""
         return self.encode(text, *args, **kwargs)
 
     @abstractmethod
-    def encode(self, text: Union[str, List[str]], *args, **kwargs) -> Union[List[str], List[List[int]]]:
+    def encode(self, text: Union[str, List[str]], *args, **kwargs) -> Union[List[int], List[List[int]]]:
         """Encode a text."""
         pass
 
     @abstractmethod
     def decode(self, tokens: Union[torch.Tensor, List[int]], *args, **kwargs) -> Union[str, List[str]]:
-        """Decode a list of tokens into a string."""
+        """Decode a list of tokens into a string.
+        If a list of tokenized sequences is provided, the function will return a list of strings.
+        If a single tokenized sequence is provided, the function will return a string.
+        """
         pass
     
     def get_tokenizer(self):

@@ -4,8 +4,7 @@ import torch
 
 
 def mean_pool(hidden_states: torch.Tensor, attention_mask: Optional[torch.Tensor] = None) -> torch.Tensor:
-    """
-    Performs mean pooling only over tokens where attention mask is 1.
+    """Performs mean pooling only over tokens where attention mask is 1.
     Args:
         hidden_states: tensor of shape (batch_size, seq_length, hidden_dim)
         attention_mask: tensor of shape (batch_size, seq_length)
@@ -13,7 +12,9 @@ def mean_pool(hidden_states: torch.Tensor, attention_mask: Optional[torch.Tensor
         Mean pooled representation of shape (batch_size, hidden_dim)
     """
     if hidden_states.dim() != 3:
-        raise ValueError(f"Expected hidden_states to have 3 dimensions (batch_size, seq_length, hidden_dim), got {hidden_states.dim()}")
+        raise ValueError(
+            f"Expected hidden_states to have 3 dimensions (batch_size, seq_length, hidden_dim), got {hidden_states.dim()}"
+        )
 
     if attention_mask is None:
         return torch.mean(hidden_states, dim=1)
@@ -40,8 +41,7 @@ def mean_pool(hidden_states: torch.Tensor, attention_mask: Optional[torch.Tensor
 def trim_attention_mask(
     attention_mask: Union[torch.Tensor, List[int]], trim_beginning: int = 0, trim_end: int = 0
 ) -> torch.Tensor:
-    """
-    Finds indices of first n and last m 1s in attention mask and sets them to 0.
+    """Finds indices of first n and last m 1s in attention mask and sets them to 0.
 
     Args:
         attention_mask: tensor of shape (batch_size, seq_length)
@@ -67,8 +67,7 @@ def trim_attention_mask(
 
 
 def rotate_padding_side(hidden_states: torch.Tensor, attention_mask: Union[torch.Tensor, List[List[int]]]) -> torch.Tensor:
-    """
-    Rotates padding side of embeddings. This is necessary for models that use padding to the left.
+    """Rotates padding side of embeddings. This is necessary for models that use padding to the left.
     Args:
         hidden_states: tensor of shape (batch_size, seq_length, hidden_dim)
         attention_mask: tensor of shape (batch_size, seq_length)
@@ -88,15 +87,16 @@ def rotate_padding_side(hidden_states: torch.Tensor, attention_mask: Union[torch
     return adjusted_hidden_states, adjusted_attention_mask
 
 
-def trim_hidden_states(hidden_states: torch.Tensor, attention_mask: torch.Tensor, trim_value: int = 0) -> torch.Tensor:
-    """Remove special tokens from embeddings.
-
-    Args:
-        hidden_states: tensor of shape (batch_size, seq_length, hidden_dim)
-        attention_mask: tensor of shape (batch_size, seq_length)
-        trim_value:
+def trim_hidden_states(
+    hidden_states: torch.Tensor, attention_mask: torch.Tensor, trim_value: torch.float = 0.0
+) -> torch.Tensor:
+    """Replace unmasked embeddings with a given value.
+     Args:
+        hidden_states: Tensor of shape (batch_size, seq_length, hidden_dim)
+        attention_mask: Boolean tensor of shape (batch_size, seq_length) where 1 indicates valid tokens and 0 indicates tokens to be trimmed
+        trim_value: Value to replace masked tokens with (default: 0.0)
     Returns:
-        Trimmed embeddings
+        torch.Tensor: Masked embeddings with same shape as input where masked positions are filled with trim_value
     """
     mask_expanded = attention_mask.unsqueeze(-1).expand(hidden_states.size())
     masked_embeddings = torch.where(mask_expanded == 1, hidden_states, trim_value)

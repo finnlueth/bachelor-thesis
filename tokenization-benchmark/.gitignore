@@ -3,3 +3,4 @@ tokenizers/alphafold_tokenizer
 tokenizers/esm3_tokenizer
 tokenizers/bio2token_tokenizer/bio2token_main
 tokenizers/foldtoken_tokenizer/FoldToken_open_master
+tokenizers/bio2token_tokenizer_legacy/bio2token_main

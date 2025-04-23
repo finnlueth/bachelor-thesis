@@ -1,21 +1,32 @@
 #!/usr/bin/env python3
+"""
+This script is used to train a model for PSSM generation.
+
+Usage:
+    python train.py
+
+    nohup ./train.py &> log.out &
+"""
 
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 import gc
 import json
 import os
+import random
 import subprocess
 from contextlib import contextmanager
 from datetime import datetime
 
+import accelerate
 import datasets
 import matplotlib.pyplot as plt
 import pandas as pd
 import torch
+import transformers
 import yaml
 from peft import LoraConfig, get_peft_model
 from plms import auto_tokenizer
@@ -24,14 +35,28 @@ from transformers import TrainingArguments
 
 from plm_pssms import DataCollatorForPSSM, PLMConfigForPSSM, PLMForPssmGeneration, ProteinSampleSubsetTrainer
 
+SEED = 42
+accelerate.utils.set_seed(SEED + 1)
+transformers.set_seed(SEED + 2)
+torch.manual_seed(SEED + 3)
+random.seed(SEED + 4)
+
+
 # identifiers_temperature = ["320", "348", "379", "413", "450"]
 # identifiers_replica = ["0", "1", "2", "3", "4"]
 
+# Running:
+# 1. Check correct model is set
+# 2. Check correct dataset is used (temperature and replica)
+# 3. Check correct device is used (device is not currently used by other processes)
+# 4. Check correct name for nohup.out
+# 5. Check config
 
-temperature_identifier = 450
-replica_identifier = "all"
 
-dataset_identifier = temperature_identifier
+temperature_identifier = 320
+replica_identifier = 0
+# model_name = "prot_t5_xl_uniref50"
+model_name = "ProstT5"
 
 config_yaml = f"""
 metadata:
@@ -41,17 +66,16 @@ metadata:
   save_dir: ../tmp/models/adapters
   CUDA_VISIBLE_DEVICES: {os.environ["CUDA_VISIBLE_DEVICES"]}
 model:
-#   encoder_name_or_path: Rostlab/prot_t5_xl_uniref50
-  encoder_name_or_path: Rostlab/ProstT5
+  encoder_name_or_path: Rostlab/{model_name}
   hidden_size: 1024
   num_labels: 20
   dropout: 0.25
 training_args:
   output_dir: ../tmp/models/checkpoints
-  learning_rate: 0.0001
+  learning_rate: 0.001 # !!! UPDATE THIS !!!
   per_device_train_batch_size: 10
   per_device_eval_batch_size: 10
-  num_train_epochs: 1
+  num_train_epochs: 15 # !!! UPDATE THIS !!!
   logging_steps: 1
   logging_strategy: steps
   evaluation_strategy: steps
@@ -85,7 +109,7 @@ weights_and_biases:
   project: prot-md-pssm
 dataset:
   name: mdcath_pssm
-  identifier: _{dataset_identifier}
+  identifier: _{temperature_identifier}_{replica_identifier}
   directory: ../tmp/data/pssm
 """
 
@@ -100,6 +124,7 @@ identifier = (
     + (f"_{config['metadata']['run_name'].replace(' ', '-')}" if config["metadata"]["run_name"] else "")
 )
 print(identifier)
+print(config_yaml)
 
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 print(device)
@@ -110,15 +135,20 @@ if config["weights_and_biases"]["enabled"]:
     wandb.init(project=config["weights_and_biases"]["project"], name=identifier)
     run = wandb.init(project=config["weights_and_biases"]["project"], name=identifier)
 
+# ----------------------------------------------------------------------------------------------------------------------
+
 ds = datasets.load_from_disk(f"{config['dataset']['directory']}/{config['dataset']['name']}{config['dataset']['identifier']}")
 ds = ds.rename_column("pssm_features", "labels")
 
 if config["model"]["encoder_name_or_path"] == "Rostlab/ProstT5":
     ds = ds.remove_columns(["input_ids_protT5", "attention_mask_protT5"])
+
     ds = ds.rename_column("input_ids_prostT5", "input_ids")
     ds = ds.rename_column("attention_mask_prostT5", "attention_mask")
+
 if config["model"]["encoder_name_or_path"] == "Rostlab/prot_t5_xl_uniref50":
     ds = ds.remove_columns(["input_ids_prostT5", "attention_mask_prostT5"])
+
     ds = ds.rename_column("input_ids_protT5", "input_ids")
     ds = ds.rename_column("attention_mask_protT5", "attention_mask")
 
@@ -126,16 +156,22 @@ ds = ds.remove_columns(["name", "sequence", "replica", "temperature"])
 # ds = ds.select(range(25))  # !!! TODO REMOVE THIS !!!
 print(ds)
 
+# ----------------------------------------------------------------------------------------------------------------------
+
 model_config = PLMConfigForPSSM(**config["model"])
 model = PLMForPssmGeneration(model_config)
 model.to(device)
 print(model)
+
+# ----------------------------------------------------------------------------------------------------------------------
 
 lora_config = LoraConfig(**config["lora"], modules_to_save=model.get_modules_to_save())
 model = get_peft_model(model, lora_config)
 print("target_modules:", lora_config.target_modules)
 print("modules_to_save:", lora_config.modules_to_save)
 model.print_trainable_parameters()
+
+# ----------------------------------------------------------------------------------------------------------------------
 
 tokenizer = auto_tokenizer(config["model"]["encoder_name_or_path"])
 
@@ -164,6 +200,8 @@ trainer = ProteinSampleSubsetTrainer(
     data_collator=data_collator,
 )
 
+# ----------------------------------------------------------------------------------------------------------------------
+
 
 def clean_memory():
     if torch.cuda.is_available():
@@ -182,7 +220,7 @@ trainer.train()
 trainer.evaluate()
 clean_memory()
 
-
+# ----------------------------------------------------------------------------------------------------------------------
 model_save_path = f"{config['metadata']['save_dir']}/{identifier}"
 
 model.save_pretrained(save_directory=model_save_path)

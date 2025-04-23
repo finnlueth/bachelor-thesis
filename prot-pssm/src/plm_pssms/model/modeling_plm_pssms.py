@@ -6,11 +6,24 @@ from typing import Optional, Tuple, Union, List
 from plms import ProteinLanguageModelPredictor
 from . import PLMConfigForPSSM, PSSMOutput
 
+class PSSMHeadLinear(nn.Module):
+    def __init__(self, hidden_size: int = 1024, num_classes: int = 20):
+        super().__init__()
+        self.linear = nn.Linear(hidden_size, num_classes)
+
+    def forward(self, x):
+        return self.linear(x)
+
 
 class PSSMHead(nn.Module):
     """Head for PSSM generation from T5 embeddings. based on https://github.com/hefeda/PGP/blob/master/prott5_batch_predictor.py#L144"""
 
-    def __init__(self, num_classes: int = 20, dropout: float = 0.25, hidden_size: int = 1024,):
+    def __init__(
+        self,
+        num_classes: int = 20,
+        dropout: float = 0.25,
+        hidden_size: int = 1024,
+    ):
         super().__init__()
         self.classifier = nn.Sequential(
             nn.Conv1d(hidden_size, 32, kernel_size=7, padding=3),

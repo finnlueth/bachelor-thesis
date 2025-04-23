@@ -55,8 +55,8 @@ class ProtT5(ProteinLanguageModel):
             self.config.trim_value,
         )
 
-        max_dim = attention_mask.sum(dim=1).max()
-        attention_mask = attention_mask[:, :max_dim]
-        model_outputs["last_hidden_state"] = model_outputs["last_hidden_state"][:, :max_dim, :]
+        # max_dim = attention_mask.sum(dim=1).max()
+        # attention_mask = attention_mask[:, :max_dim]
+        # model_outputs["last_hidden_state"] = model_outputs["last_hidden_state"][:, :max_dim, :]
 
         return ProteinLanguageModelOutput(**model_outputs, mask=attention_mask)

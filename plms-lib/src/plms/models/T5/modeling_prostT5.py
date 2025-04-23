@@ -61,7 +61,8 @@ class ProstT5(ProteinLanguageModel):
         # max_dim = attention_mask.sum(dim=1).max()
         # attention_mask = attention_mask[:, :max_dim]
         # model_outputs["last_hidden_state"] = model_outputs["last_hidden_state"][:, :max_dim, :]
-        # Add an extra dimension of zeros at the end
+
+        # Add an extra dimension of zeros at the end to get to unified output representation
         attention_mask = F.pad(attention_mask, (0, 1), value=0)
         model_outputs["last_hidden_state"] = F.pad(model_outputs["last_hidden_state"], (0, 0, 0, 1, 0, 0), value=0)
 

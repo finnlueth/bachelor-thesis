@@ -1,7 +1,9 @@
 """
-python3 scripts/pssm_script.py --input_path /home/finnlueth/mnt/smb/data/datasets/mdCATH/data --output_path ./tmp/output/pssm/mdcath --dataset mdcath
+python3 scripts/pssm_script.py --input_path /home/finnlueth/mnt/smb/data/datasets/mdCATH/data --output_path ./tmp/output/pssm/mdcath_nopc --dataset mdcath
 
-['A C D E F G H I K L M N P Q R S T V W Y']
+python3 scripts/pssm_script.py --input_path /mnt/gondolin/data/datasets/mdCATH/data --output_path ./tmp/output/pssm/mdcath_nopc --dataset mdcath
+
+'A C D E F G H I K L M N P Q R S T V W Y'
 """
 
 import argparse
@@ -151,13 +153,13 @@ def get_pssm_from_trajectory(trajectory_pdbs: T.List[str]) -> np.ndarray:
 
         victors_params = [
             "--pca",
-            "1.4",
+            "0",
             "--pcb",
             "1.5",
             "--profile-output-mode",
             "1",
             "--sub-mat",
-            "/home/finnlueth/repos/bachelor-thesis/mdcath-to-3di/submodules/foldseek/data/mat3di.out",
+            "/home/finnlueth/repos/bachelor-thesis/prot-md-pssm-legacy/submodules/foldseek/data/mat3di.out",
             "--mask-profile",
             "0",
             "--comp-bias-corr",
